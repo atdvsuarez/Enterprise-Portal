@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Bid Intelligence — Cummins Aftermarket"
+version = "1.0.0"
+id = "artifacts/bid-intelligence"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23010
+
+[services.development]
+run = "pnpm --filter @workspace/bid-intelligence run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/bid-intelligence", "run", "build" ]
+publicDir = "artifacts/bid-intelligence/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23010"
+BASE_PATH = "/"

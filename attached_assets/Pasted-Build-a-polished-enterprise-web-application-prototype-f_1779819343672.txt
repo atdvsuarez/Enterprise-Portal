@@ -1,0 +1,642 @@
+Build a polished enterprise web application prototype for “Bid Intelligence” for Cummins Aftermarket.
+
+TECH STACK
+- React + Vite + TypeScript
+- Tailwind CSS
+- Component-driven architecture
+- Single-page app with role-based views
+- No backend required
+- Use realistic mock data only
+- No URL routing required; use tab/button navigation within the app
+- Make the application feel like a real SaaS platform suitable for a client demo
+
+PRIMARY PRODUCT GOAL
+This platform supports the bid lifecycle across multiple user roles:
+- Scouts identify and filter opportunities from multiple bid portals
+- Admins (Daily Bids team) process incoming bids using 3 intake patterns and generate draft responses
+- Account Executives (AEs) review summarized bid packages and make final decisions
+
+IMPORTANT UX CONTEXT
+The platform should feel like one integrated system, not separate apps.
+All roles use the same underlying bid/opportunity data model, but each role sees different screens, actions, and navigation options.
+
+ROLES TO SUPPORT
+
+1. Admin (Primary Persona / Daily Bids Team)
+Purpose:
+- Main operational user for the MVP
+- Handles 3 primary intake patterns:
+  a) Email Body intake
+  b) Excel Attachment intake
+  c) External URL / public portal link intake
+- Reviews extracted parts and quantities
+- Checks AI-derived insights
+- Generates or edits bid responses
+- Moves bids through qualification and response preparation
+
+2. Scout
+Purpose:
+- Monitors portals and discovers opportunities
+- Filters signal from noise
+- Reviews AI relevance scoring
+- Shortlists and hands off relevant opportunities for Admin processing
+
+3. Account Executive (AE)
+Purpose:
+- Reviews qualified bids
+- Sees summarized, executive-friendly views instead of raw ingestion details
+- Approves, requests changes, or rejects bids
+- Reviews risks, pricing summary, and recommended next actions
+
+APPLICATION INFORMATION ARCHITECTURE
+
+The app should include:
+- Global top bar / left nav
+- Role switcher at the top-right (Admin / Scout / AE)
+- Shared brand: “Bid Intelligence”
+- Subtitle: “Cummins Aftermarket”
+- Enterprise visual style similar to modern internal tools / procurement dashboards
+- Dark left nav + light main work area
+- Professional spacing, tables, cards, status badges, and progress indicators
+
+GLOBAL NAVIGATION (role-aware)
+
+Shared / visible in some form:
+- Dashboard
+- Bid Monitor
+- Bid Intake
+- Bid Evaluation
+- Response Workbench
+- Knowledge Base
+- Portal Manager
+- Post Submission
+- Analytics
+- Settings
+
+Role-based display:
+- Admin sees: Dashboard, Bid Intake, Bid Monitor, Bid Evaluation, Response Workbench, Knowledge Base, Post Submission, Analytics, Settings
+- Scout sees: Dashboard, Portal Manager, Bid Monitor, Bid Evaluation, Knowledge Base, Analytics, Settings
+- AE sees: Dashboard, Bid Approval Queue, Executive Summary, Post Submission, Analytics, Settings
+
+DESIGN SYSTEM REQUIREMENTS
+- Clean enterprise UI
+- Use cards, tables, segmented tabs, progress bars, badges, drawers, and modals
+- Use consistent status colors:
+  - Blue = Active / In Progress
+  - Green = Ready / Complete / Approved
+  - Orange = Needs Review / At Risk
+  - Red = Blocked / Restricted / Rejected
+  - Purple = AI-generated / AI insight / portal intelligence
+- Smooth transitions between screens
+- Hover states and clean empty states
+- Avoid flashy consumer styling; keep it business-ready
+
+PORTAL MODEL (simulate 5 portal types)
+
+Show these 5 portals in the Portal Manager and Dashboard:
+1. PlanetBids
+2. OpenGov
+3. Oracle iSupplier
+4. Fairmarkit
+5. Bonfire / Euna Procurement
+
+Each portal should have:
+- Portal name
+- Associated customers/agencies (mocked)
+- Status badge
+- Bid count
+- Last refreshed timestamp
+- Portal type badge:
+  - Structured
+  - Public
+  - Login Required
+  - High Noise
+  - Restricted
+- Primary CTA that varies by portal:
+  - Scrape Now
+  - Refresh
+  - Upload Export
+  - Connect
+  - Review Manually
+
+Portal-specific UX behavior:
+- PlanetBids: partial automation, show crawl + document extraction progress
+- OpenGov: structured and high-confidence; show cleaner scrape result
+- Oracle iSupplier: legacy feel, emphasize document extraction and lower confidence
+- Fairmarkit: login-protected / restricted; show API / manual import fallback
+- Bonfire: high-noise portal; show AI relevance scoring and filtering
+
+CORE DATA MODEL
+
+Use a realistic shared data model for bids/opportunities:
+
+Bid / Opportunity fields:
+- id
+- rfqId
+- externalId
+- title
+- customer
+- customerType
+- sourceType (Email / Excel / URL / Portal)
+- portalName
+- intakePattern (Email Body / Excel Attachment / External URL)
+- createdDate
+- closeDate
+- status
+- pipelineStage (Identify / Qualify / Respond / Post-Submission)
+- aiRelevanceScore
+- goNoGoRecommendation
+- confidenceLevel
+- priority
+- totalParts
+- matchedParts
+- unmatchedParts
+- pricingStatus
+- inventoryStatus
+- leadTimeStatus
+- assignedScout
+- assignedAdmin
+- assignedAE
+- notes
+- riskFlags (array)
+- documents (array)
+- knowledgePackLinks (array)
+- submissionState
+- outcomeState
+
+Line Item fields:
+- lineNumber
+- partNumber
+- description
+- quantity
+- matchedPart
+- availability
+- price
+- leadTime
+- sourceConfidence
+- exceptionFlag
+
+Role-specific mock users:
+- Admin: Daily Bids Admin
+- Scout: Bid Scout
+- AE: Account Executive
+
+HIGH-LEVEL USER FLOWS
+
+FLOW 1: Admin / Daily Bids Team
+1. Intake bid from one of 3 patterns
+2. Review extracted metadata and line items
+3. Validate AI extraction confidence and unmatched items
+4. Review pricing / inventory / lead time summary
+5. Open Response Workbench
+6. Generate, edit, and export response draft
+7. Mark ready for AE review or submit mock response
+
+FLOW 2: Scout
+1. Review portal health and new opportunities
+2. Run portal scans / refreshes / upload exports
+3. Filter opportunities by relevance score and customer fit
+4. Open opportunity detail and review AI rationale
+5. Shortlist / hand off to Admin
+
+FLOW 3: AE
+1. Open approval queue
+2. Review executive bid summary
+3. Review summarized pricing, risks, and recommendation
+4. Approve / Request Changes / Reject
+5. Track post-submission outcomes
+
+SCREENS TO BUILD
+
+====================================
+1. DASHBOARD (shared landing page, changes by role)
+====================================
+
+For Admin:
+- KPI cards:
+  - New bids today
+  - Ready for review
+  - Response drafts in progress
+  - Approvals pending
+- “3 Intake Patterns” summary card showing:
+  - Email Body
+  - Excel Attachment
+  - External URL
+- “Recent Intake Activity” panel with scan/upload logs
+- “Portal Resources” card section similar to a procurement intelligence view
+- “Needs Attention” panel showing unmatched parts / blocked bids / missing documents
+
+For Scout:
+- KPI cards:
+  - New opportunities
+  - High-relevance opportunities
+  - Restricted portals
+  - Handed off today
+- Portal resources cards with portal type badges
+- Recent portal refreshes
+- AI signal/noise trend chart
+- Opportunity shortlist panel
+
+For AE:
+- KPI cards:
+  - Ready for approval
+  - High-value bids
+  - Expiring soon
+  - Submitted awaiting response
+- Approval queue preview
+- Executive summary insights
+- Risk overview donut/bar chart
+- Recent decisions panel
+
+====================================
+2. PORTAL MANAGER (Scout-primary)
+====================================
+
+Show a list of portal cards with:
+- Name
+- Logo placeholder / icon
+- Type badge
+- Bid count
+- Last sync time
+- Status
+- Primary action button
+- Secondary actions dropdown
+
+Expanded state for a selected portal:
+- Portal overview
+- Bid table
+- Documents tab
+- Sync log
+- AI filter summary
+
+For each portal, show a portal-specific operational note:
+- Structured data confidence
+- Login restriction
+- High-noise environment
+- Requires manual export
+- Best-effort public scraping only
+
+Add table columns:
+- RFQ ID
+- External ID
+- RFQ Title
+- Customer
+- Status
+- Created Date
+- Closes Date
+- Relevance
+- Action
+
+====================================
+3. BID INTAKE (Admin-primary, MUST BE STRONG)
+====================================
+
+This is one of the most important screens.
+
+Use a tabbed layout for the 3 intake patterns:
+
+Tab A: Email Body Intake
+- Input area for pasted email body text
+- Optional customer selector
+- “Run extraction” button
+- Side panel showing extracted part IDs and quantities
+- AI confidence summary
+- Intake log below
+
+Tab B: Excel Attachment Intake
+- Drag/drop upload zone
+- File info panel
+- Parsed line items preview table
+- Validation issues panel
+- “Map columns” mock interaction
+- “Continue to Bid Evaluation” button
+
+Tab C: External URL Intake
+- URL input box
+- Portal detection badge
+- “Scan URL” button
+- Crawl progress log
+- Document detection results
+- Structured extraction summary
+
+Each tab should show:
+- Scan / extraction progress
+- Success / warning / blocked states
+- Extracted bid metadata
+- Ability to move to Bid Evaluation
+
+====================================
+4. BID MONITOR / PROCESSING QUEUE
+====================================
+
+Admin + Scout can use this screen differently.
+
+Use a large table with filter chips:
+- All
+- New
+- Needs Review
+- Ready for Response
+- Pending Approval
+- Submitted
+- Restricted
+- Exception
+
+Columns:
+- Bid ID
+- Title
+- Customer
+- Source Type
+- Portal
+- Pipeline Stage
+- AI Score
+- Total Parts
+- Matched / Unmatched
+- Assigned To
+- SLA Timer
+- Status
+
+Allow:
+- search
+- filtering by source type / portal / stage / owner / priority
+- clicking a row opens Bid Detail
+- bulk actions (mock only)
+
+====================================
+5. BID DETAIL + AI EVALUATION
+====================================
+
+Shared detail screen with role-aware sections.
+
+Layout:
+Left / main column:
+- Bid summary header
+- Bid metadata
+- Documents list
+- Extracted line items table
+- Matching results table
+
+Right rail:
+- AI recommendation card
+- Go / No-Go recommendation
+- Confidence meter
+- Risk flags
+- Missing info / exceptions
+- Similar prior bids / knowledge references (mocked)
+- Suggested next action
+
+For Admin:
+- editable notes
+- line-item validation actions
+- send to response workbench
+
+For Scout:
+- shortlist / discard / handoff
+- relevance explanation
+
+For AE:
+- read-only detail summary, no raw ingestion controls
+
+====================================
+6. RESPONSE WORKBENCH (Admin-primary)
+====================================
+
+This should feel like the center of the operational workflow.
+
+Sections:
+- Bid details header
+- Customer & response metadata
+- Response template editor
+- Line item response grid
+- AI-generated draft email / response text
+- Attachments/documents panel
+- Action tray:
+  - Generate Draft
+  - Regenerate
+  - Edit
+  - Export CSV
+  - Export Email Draft
+  - Mark Ready for Approval
+
+Line item response grid columns:
+- Line #
+- Requested Part
+- Matched Part
+- Description
+- Quantity
+- Price
+- Lead Time
+- Notes
+- Exception
+
+Show summary metrics:
+- matched items count
+- unmatched items count
+- pricing confidence
+- estimated turnaround readiness
+
+====================================
+7. BID APPROVAL QUEUE (AE-primary)
+====================================
+
+Executive-facing queue screen.
+
+Cards or table of bids awaiting approval:
+- Customer
+- Bid title
+- Value band
+- AI recommendation
+- Margin / pricing readiness
+- Risk level
+- Expiration urgency
+- Assigned Admin
+- Recommended action
+
+Filters:
+- High value
+- Expiring soon
+- High risk
+- Ready to approve
+- Needs changes
+
+Click opens Executive Summary
+
+====================================
+8. EXECUTIVE SUMMARY (AE-primary)
+====================================
+
+Create a clean, high-level screen for AE review.
+
+Sections:
+- Opportunity Summary
+- Why This Bid Matters
+- AI Recommendation
+- Pricing / Inventory Summary
+- Risks & Exceptions
+- Key Documents
+- Suggested Response Position
+- Timeline / close date
+- Approval decision panel
+
+Buttons:
+- Approve
+- Request Changes
+- Reject
+- Escalate
+
+Show this screen as polished and concise, avoiding raw operational detail.
+
+====================================
+9. KNOWLEDGE BASE
+====================================
+
+Shared role-based knowledge module.
+
+Purpose:
+- historical bids
+- prior responses
+- win/loss notes
+- customer-specific guidance
+- template snippets
+
+Layout:
+- Search bar
+- Filter panel
+- Result cards / tables
+- “AI Summary” panel
+- “Ask a Question” box
+- Document categories:
+  - Prior Bids
+  - Win/Loss Notes
+  - Pricing Guidance
+  - Customer Terms
+  - Templates
+
+For Admin:
+- helpful for drafting responses
+For Scout:
+- helpful for relevance filtering
+For AE:
+- helpful for strategic review
+
+====================================
+10. POST-SUBMISSION TRACKER
+====================================
+
+Track what happens after submission.
+
+Statuses:
+- Submitted
+- Customer Follow-up
+- Clarification Requested
+- Won
+- Lost
+- No Response
+- Escalated
+
+Include:
+- timeline view
+- activity log
+- owner
+- outcome notes
+- follow-up actions
+- win/loss tag
+
+====================================
+11. ANALYTICS
+====================================
+
+Show role-relevant analytics:
+- bid volume by source type
+- portal opportunity trends
+- AI recommendation distribution
+- qualification funnel
+- response turnaround time
+- submission outcomes
+- portal reliability / restriction mix
+- matched vs unmatched parts trend
+
+Charts:
+- bar
+- line
+- donut
+- stacked bar
+
+====================================
+12. SETTINGS
+====================================
+
+Mock settings page:
+- profile
+- notifications
+- role preferences
+- portal connections
+- export preferences
+- AI behavior toggles
+- threshold settings for relevance / qualification
+
+INTERACTIONS / MICRO-STATES
+
+Must include:
+- loading states
+- progress states
+- toast notifications
+- empty states
+- warning banners
+- blocked/restricted states
+- confirmation modals
+- tooltips for AI reasoning
+- “last updated” timestamps
+
+AI UX REQUIREMENTS
+
+The application should visually show AI support in the following ways:
+- AI relevance score for opportunities
+- AI confidence level for extracted line items
+- Go / No-Go recommendation
+- Suggested rationale / reasoning cards
+- Highlight unmatched parts and missing data
+- Suggest next-best actions
+- Draft response generation in the Response Workbench
+- AI-assisted summarization in the Knowledge Base and Executive Summary
+
+IMPORTANT CONTENT CONSTRAINTS
+- Do not make the product look fully autonomous
+- Keep humans in the loop
+- Admin validates and edits
+- Scout shortlists and hands off
+- AE makes final approval decisions
+- Show advisory AI, not uncontrolled automation
+
+MOCK DATA REQUIREMENTS
+
+Generate realistic mock data:
+- Use multiple agencies/customers
+- Use realistic RFQ titles related to aftermarket, fleet, transit, parts, chassis, buses, municipal procurement, etc.
+- Use realistic dates, statuses, and portal counts
+- Populate 20+ bids/opportunities
+- Include 5–10 detailed line-item examples in at least 2 bid detail screens
+- Include both matched and unmatched parts
+- Include both high-confidence and low-confidence examples
+- Include both public and restricted portal cases
+
+VISUAL PRIORITIES
+- Professional, demo-ready, client-safe UI
+- High density but clean
+- Tables should be readable
+- Cards should be useful, not decorative
+- Strong hierarchy and navigation
+- Make the product believable for an enterprise AI transformation demo
+
+DELIVERABLE
+Return a fully working interactive front-end prototype with:
+- role switcher
+- all major screens
+- connected mock flows
+- consistent design system
+- realistic procurement/bid intelligence content
+- no backend dependencies
+
+BONUS (if easy)
+- Include a “switch role” dropdown that changes nav and default landing page
+- Include a “portal health” mini-widget
+- Include a “recent AI actions” activity feed
