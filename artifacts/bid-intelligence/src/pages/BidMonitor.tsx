@@ -118,25 +118,25 @@ export default function BidMonitor() {
           </TableHeader>
           <TableBody>
             {filteredBids.map((bid) => (
-              <TableRow 
-                key={bid.id} 
-                className="h-10 cursor-pointer hover:bg-muted/50 transition-colors"
+              <TableRow
+                key={bid.id}
+                className="cursor-pointer even:bg-neutral-50/60 hover:bg-neutral-100/70 transition-colors"
                 onClick={() => setLocation(`/evaluation/${bid.id}`)}
               >
-                <TableCell className="font-mono text-xs font-medium text-primary">{bid.id}</TableCell>
-                <TableCell className="truncate max-w-[250px]" title={bid.title}>{bid.title}</TableCell>
-                <TableCell>{bid.customer}</TableCell>
-                <TableCell><span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">{bid.sourceType}</span></TableCell>
-                <TableCell className="text-xs text-muted-foreground">{bid.portalName || "—"}</TableCell>
-                <TableCell className="text-xs">{bid.pipelineStage}</TableCell>
-                <TableCell className="text-center"><AIScorePill score={bid.aiRelevanceScore} /></TableCell>
-                <TableCell className="text-center tabular-nums text-xs">
-                  <span className="text-green-600 font-medium">{bid.matchedParts}</span>
+                <TableCell className="font-mono text-xs font-medium text-primary py-3">{bid.id}</TableCell>
+                <TableCell className="truncate max-w-[250px] py-3" title={bid.title}>{bid.title}</TableCell>
+                <TableCell className="py-3">{bid.customer}</TableCell>
+                <TableCell className="py-3"><span className="text-xs bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded">{bid.sourceType}</span></TableCell>
+                <TableCell className="text-xs text-muted-foreground py-3">{bid.portalName || "—"}</TableCell>
+                <TableCell className="text-xs py-3">{bid.pipelineStage}</TableCell>
+                <TableCell className="text-center py-3"><AIScorePill score={bid.aiRelevanceScore} /></TableCell>
+                <TableCell className="text-center tabular-nums text-xs py-3">
+                  <span className="text-[#1f7a4a] font-medium">{bid.matchedParts}</span>
                   <span className="text-muted-foreground mx-1">/</span>
-                  <span className={bid.unmatchedParts > 0 ? "text-amber-600 font-medium" : "text-muted-foreground"}>{bid.unmatchedParts}</span>
+                  <span className={bid.unmatchedParts > 0 ? "text-[#DA291C] font-medium" : "text-muted-foreground"}>{bid.unmatchedParts}</span>
                 </TableCell>
-                <TableCell className="text-xs">{bid.assignedAdmin}</TableCell>
-                <TableCell><StatusBadge status={bid.status} /></TableCell>
+                <TableCell className="text-xs py-3">{bid.assignedAdmin}</TableCell>
+                <TableCell className="py-3"><StatusBadge status={bid.status} /></TableCell>
               </TableRow>
             ))}
             {filteredBids.length === 0 && (

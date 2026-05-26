@@ -85,12 +85,12 @@ export function Sidebar() {
             return (
               <Link key={link.href} href={link.href}>
                 <span className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer",
-                  isActive 
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm" 
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  "relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors cursor-pointer",
+                  isActive
+                    ? "bg-sidebar-accent text-white before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-[3px] before:rounded-r-sm before:bg-sidebar-primary"
+                    : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-white"
                 )}>
-                  <Icon className="w-4 h-4" />
+                  <Icon className={cn("w-4 h-4 transition-colors", isActive ? "text-sidebar-primary" : "")} />
                   {link.label}
                 </span>
               </Link>

@@ -32,7 +32,7 @@ function AdminDashboard() {
       key: "email",
       title: "Email Intake",
       icon: Mail,
-      color: "blue",
+      accent: "#55A1D3", // Tide
       newCount: 9,
       processed: 7,
       pending: 2,
@@ -44,7 +44,7 @@ function AdminDashboard() {
       key: "excel",
       title: "Excel Intake",
       icon: FileSpreadsheet,
-      color: "green",
+      accent: "#30A566", // Pasture
       newCount: 11,
       processed: 9,
       pending: 1,
@@ -56,7 +56,7 @@ function AdminDashboard() {
       key: "url",
       title: "External URL Intake",
       icon: Link2,
-      color: "purple",
+      accent: "#787877", // Gray — neutral channel
       newCount: 4,
       processed: 3,
       pending: 0,
@@ -65,12 +65,6 @@ function AdminDashboard() {
       sourceFilter: "External URL" as const,
     },
   ];
-
-  const colorMap: Record<string, { bg: string; text: string; ring: string; bar: string }> = {
-    blue:   { bg: "bg-blue-50",   text: "text-blue-600",   ring: "ring-blue-100",   bar: "bg-blue-600"   },
-    green:  { bg: "bg-green-50",  text: "text-green-600",  ring: "ring-green-100",  bar: "bg-green-600"  },
-    purple: { bg: "bg-purple-50", text: "text-purple-600", ring: "ring-purple-100", bar: "bg-purple-600" },
-  };
 
   const actionQueue = [
     {
@@ -96,10 +90,10 @@ function AdminDashboard() {
   ];
 
   const queueColor: Record<string, { border: string; bg: string; icon: string; count: string }> = {
-    amber:  { border: "border-amber-200",  bg: "bg-amber-50/60",  icon: "text-amber-600",  count: "text-amber-700" },
-    green:  { border: "border-green-200",  bg: "bg-green-50/60",  icon: "text-green-600",  count: "text-green-700" },
-    purple: { border: "border-purple-200", bg: "bg-purple-50/60", icon: "text-purple-600", count: "text-purple-700" },
-    red:    { border: "border-red-200",    bg: "bg-red-50/60",    icon: "text-red-600",    count: "text-red-700"   },
+    amber:  { border: "border-neutral-200", bg: "bg-white", icon: "text-neutral-700",          count: "text-neutral-900" },
+    green:  { border: "border-neutral-200", bg: "bg-white", icon: "text-[#30A566]",            count: "text-[#1f7a4a]"   },
+    purple: { border: "border-neutral-200", bg: "bg-white", icon: "text-neutral-700",          count: "text-neutral-900" },
+    red:    { border: "border-[#DA291C]/30", bg: "bg-white", icon: "text-[#DA291C]",           count: "text-[#DA291C]"   },
   };
 
   return (
@@ -139,19 +133,18 @@ function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {intake.map(card => {
             const Icon = card.icon;
-            const c = colorMap[card.color];
             const total = card.processed + card.pending + card.failed || 1;
             const processedPct = (card.processed / total) * 100;
             const pendingPct = (card.pending / total) * 100;
             const showLatest = card.key === "email";
 
             return (
-              <Card key={card.key} className="shadow-sm border-l-4" style={{ borderLeftColor: card.color === "blue" ? "#2563eb" : card.color === "green" ? "#16a34a" : "#9333ea" }}>
+              <Card key={card.key} className="shadow-sm border-l-2" style={{ borderLeftColor: card.accent }}>
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-lg ${c.bg} ring-1 ${c.ring} flex items-center justify-center`}>
-                        <Icon className={`h-5 w-5 ${c.text}`} />
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: `${card.accent}1A` }}>
+                        <Icon className="h-5 w-5" style={{ color: card.accent }} />
                       </div>
                       <div>
                         <CardTitle className="text-base">{card.title}</CardTitle>
@@ -166,27 +159,27 @@ function AdminDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-md bg-green-50/60 border border-green-100 py-1.5">
-                      <div className="text-sm font-bold tabular-nums text-green-700">{card.processed}</div>
+                    <div className="rounded-md border border-neutral-200 bg-neutral-50 py-1.5">
+                      <div className="text-sm font-bold tabular-nums text-[#1f7a4a]">{card.processed}</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Processed</div>
                     </div>
-                    <div className="rounded-md bg-amber-50/60 border border-amber-100 py-1.5">
-                      <div className="text-sm font-bold tabular-nums text-amber-700">{card.pending}</div>
+                    <div className="rounded-md border border-neutral-200 bg-neutral-50 py-1.5">
+                      <div className="text-sm font-bold tabular-nums text-neutral-700">{card.pending}</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Pending</div>
                     </div>
-                    <div className="rounded-md bg-red-50/60 border border-red-100 py-1.5">
-                      <div className="text-sm font-bold tabular-nums text-red-700">{card.failed}</div>
+                    <div className="rounded-md border border-neutral-200 bg-neutral-50 py-1.5">
+                      <div className={`text-sm font-bold tabular-nums ${card.failed > 0 ? "text-[#DA291C]" : "text-neutral-400"}`}>{card.failed}</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Failed</div>
                     </div>
                   </div>
 
-                  <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden flex">
-                    <div className={c.bar} style={{ width: `${processedPct}%` }} />
-                    <div className="bg-amber-400" style={{ width: `${pendingPct}%` }} />
+                  <div className="h-1.5 rounded-full bg-neutral-100 overflow-hidden flex">
+                    <div style={{ width: `${processedPct}%`, background: "#30A566" }} />
+                    <div style={{ width: `${pendingPct}%`, background: "#C9C7C7" }} />
                   </div>
 
                   {showLatest && (
-                    <div className="rounded-md border bg-slate-50/60 p-3">
+                    <div className="rounded-md border bg-neutral-50 p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">Latest bid</span>
                         <span className="font-mono text-[10px] text-primary">{latestBid.id}</span>
@@ -204,7 +197,7 @@ function AdminDashboard() {
                         <Eye className="h-3.5 w-3.5" /> View Details
                       </Button>
                     </Link>
-                    <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs"
+                    <Button size="sm" className="w-full gap-1.5 text-xs"
                       onClick={() => toast.success(`AI summary generated for latest ${card.title.toLowerCase()} bid`, { description: "Summary ready in Bid Monitor." })}>
                       <Sparkles className="h-3.5 w-3.5" /> Fetch Summary
                     </Button>
@@ -253,10 +246,10 @@ function AdminDashboard() {
 
       {/* ===== Side glance row ===== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="shadow-sm border-amber-200 bg-amber-50/30 lg:col-span-2">
+        <Card className="shadow-sm border-l-2 border-l-[#DA291C] lg:col-span-2">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-amber-800 text-base">
-              <AlertTriangle className="h-4 w-4" /> Needs Attention
+            <CardTitle className="flex items-center gap-2 text-base text-foreground">
+              <AlertTriangle className="h-4 w-4 text-[#DA291C]" /> Needs Attention
             </CardTitle>
             <CardDescription>Bids flagged by AI or pricing exceptions in the last 24h</CardDescription>
           </CardHeader>
@@ -270,7 +263,7 @@ function AdminDashboard() {
                         <span className="font-mono text-xs font-medium text-primary">{b.id}</span>
                         <p className="text-xs text-muted-foreground truncate mt-0.5">{b.customer}</p>
                       </div>
-                      <Badge variant="outline" className="text-amber-700 border-amber-200 bg-amber-50 text-[10px] shrink-0 ml-2">{b.status}</Badge>
+                      <Badge variant="outline" className="text-[10px] shrink-0 ml-2 border-[#DA291C]/30 text-[#DA291C] bg-white">{b.status}</Badge>
                     </div>
                   </Link>
                 </li>
@@ -286,8 +279,8 @@ function AdminDashboard() {
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Avg AI confidence</span><span className="font-semibold tabular-nums">87%</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Avg response time</span><span className="font-semibold tabular-nums">4.2h</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Unmatched parts</span><span className="font-semibold tabular-nums text-amber-700">12</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Open exceptions</span><span className="font-semibold tabular-nums text-red-700">3</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Unmatched parts</span><span className="font-semibold tabular-nums">12</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Open exceptions</span><span className="font-semibold tabular-nums text-[#DA291C]">3</span></div>
           </CardContent>
         </Card>
       </div>
@@ -315,24 +308,33 @@ function ScoutDashboard() {
     },
   ];
 
-  const tierColor: Record<string, { border: string; bar: string; chip: string; signal: string }> = {
-    green: { border: "border-green-200", bar: "bg-green-500",  chip: "bg-green-50 text-green-700 border-green-200",  signal: "bg-green-500" },
-    amber: { border: "border-amber-200", bar: "bg-amber-500",  chip: "bg-amber-50 text-amber-700 border-amber-200",  signal: "bg-amber-500" },
-    slate: { border: "border-slate-200", bar: "bg-slate-400",  chip: "bg-slate-100 text-slate-700 border-slate-200", signal: "bg-slate-400" },
+  const tierColor: Record<string, { hex: string; bar: string; chip: string }> = {
+    green: { hex: "#30A566", bar: "bg-[#30A566]", chip: "bg-[#30A566]/10 text-[#1f7a4a] border-[#30A566]/30" },
+    amber: { hex: "#787877", bar: "bg-[#787877]", chip: "bg-neutral-100 text-neutral-700 border-neutral-300" },
+    slate: { hex: "#C9C7C7", bar: "bg-[#C9C7C7]", chip: "bg-neutral-50 text-neutral-500 border-neutral-200" },
   };
 
   const aiFilter = [
-    { label: "High Confidence", count: 184, pct: 31, color: "bg-green-500", text: "text-green-700", note: "Auto-promoted to Admin queue" },
-    { label: "Medium Confidence", count: 312, pct: 53, color: "bg-amber-500", text: "text-amber-700", note: "Held for Scout triage" },
-    { label: "Low Confidence", count: 88,  pct: 16, color: "bg-slate-300", text: "text-slate-600", note: "Filtered out of pipeline" },
+    { label: "High Confidence",   count: 184, pct: 31, color: "bg-[#30A566]",  text: "text-[#1f7a4a]",  note: "Auto-promoted to Admin queue" },
+    { label: "Medium Confidence", count: 312, pct: 53, color: "bg-[#787877]",  text: "text-neutral-700", note: "Held for Scout triage" },
+    { label: "Low Confidence",    count: 88,  pct: 16, color: "bg-[#C9C7C7]",  text: "text-neutral-500", note: "Filtered out of pipeline" },
   ];
 
   const portalHealth = [
-    { name: "Structured",    value: 312, fill: "#16a34a", icon: ShieldCheck },
-    { name: "Login Required",value: 246, fill: "#2563eb", icon: Lock },
-    { name: "High Noise",    value: 412, fill: "#f59e0b", icon: Radio },
-    { name: "Restricted",    value: 56,  fill: "#ef4444", icon: ShieldAlert },
+    { name: "Structured",     value: 312, fill: "#30A566", icon: ShieldCheck },
+    { name: "Login Required", value: 246, fill: "#55A1D3", icon: Lock },
+    { name: "High Noise",     value: 412, fill: "#C9C7C7", icon: Radio },
+    { name: "Restricted",     value: 56,  fill: "#DA291C", icon: ShieldAlert },
   ];
+
+  // Funnel: 1,026 portals → 11,800 scanned → 584 relevant → 184 shortlisted
+  const funnel = [
+    { label: "Portals Monitored",      value: 1026,  hex: "#474747", sub: "Active crawlers" },
+    { label: "Opportunities Scanned",  value: 11800, hex: "#787877", sub: "Raw items in last 24h" },
+    { label: "Relevant After AI",      value: 584,   hex: "#30A566", sub: "Passed relevance filter" },
+    { label: "Shortlisted",            value: 184,   hex: "#DA291C", sub: "Ready for Admin handoff" },
+  ];
+  const funnelMax = funnel[0].value;
   const totalPortals = portalHealth.reduce((s, p) => s + p.value, 0);
 
   const shortlist = [...mockBids].sort((a, b) => b.aiRelevanceScore - a.aiRelevanceScore).slice(0, 6);
@@ -370,7 +372,7 @@ function ScoutDashboard() {
             const tc = tierColor[t.color];
             const conversion = ((t.relevant / t.detected) * 100).toFixed(1);
             return (
-              <Card key={t.tier} className={`shadow-sm border-l-4 ${tc.border}`} style={{ borderLeftColor: t.color === "green" ? "#16a34a" : t.color === "amber" ? "#f59e0b" : "#94a3b8" }}>
+              <Card key={t.tier} className="shadow-sm border-l-2" style={{ borderLeftColor: tc.hex }}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <Badge variant="outline" className={`${tc.chip} text-[10px] uppercase tracking-wider font-semibold`}>{t.tier}</Badge>
@@ -389,11 +391,11 @@ function ScoutDashboard() {
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Portals</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold tabular-nums text-slate-600">{t.detected.toLocaleString()}</div>
+                      <div className="text-xl font-bold tabular-nums text-neutral-700">{t.detected.toLocaleString()}</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Detected</div>
                     </div>
                     <div>
-                      <div className="text-xl font-bold tabular-nums text-green-700">{t.relevant.toLocaleString()}</div>
+                      <div className="text-xl font-bold tabular-nums text-[#1f7a4a]">{t.relevant.toLocaleString()}</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Relevant</div>
                     </div>
                   </div>
@@ -402,8 +404,8 @@ function ScoutDashboard() {
                       <span className="text-muted-foreground">Signal strength</span>
                       <span className="font-semibold tabular-nums">{conversion}% match</span>
                     </div>
-                    <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                      <div className={`h-full ${tc.signal}`} style={{ width: `${t.signal}%` }} />
+                    <div className="h-2 rounded-full bg-neutral-100 overflow-hidden">
+                      <div className={`h-full ${tc.bar}`} style={{ width: `${t.signal}%` }} />
                     </div>
                   </div>
                 </CardContent>
@@ -413,6 +415,47 @@ function ScoutDashboard() {
         </div>
       </section>
 
+      {/* ===== Discovery Funnel ===== */}
+      <Card className="shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Filter className="h-4 w-4 text-muted-foreground" /> Discovery Funnel
+          </CardTitle>
+          <CardDescription>From 1,000+ monitored portals down to the bids worth Admin attention.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {funnel.map((step, i) => {
+              const widthPct = Math.max(8, (step.value / funnelMax) * 100);
+              const dropPct = i > 0 ? Math.round((1 - step.value / funnel[i - 1].value) * 100) : null;
+              return (
+                <div key={step.label} className="grid grid-cols-[180px_1fr_auto] items-center gap-4">
+                  <div>
+                    <div className="text-xs font-semibold">{step.label}</div>
+                    <div className="text-[11px] text-muted-foreground">{step.sub}</div>
+                  </div>
+                  <div className="relative h-9 bg-neutral-50 rounded-sm overflow-hidden">
+                    <div
+                      className="h-full flex items-center justify-end px-3 text-xs font-semibold text-white tabular-nums transition-all"
+                      style={{ width: `${widthPct}%`, background: step.hex }}
+                    >
+                      {step.value.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="text-right w-20">
+                    {dropPct !== null ? (
+                      <span className="text-[11px] text-muted-foreground">−{dropPct}% filtered</span>
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground">baseline</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* ===== AI Filtering Summary ===== */}
         <Card className="shadow-sm lg:col-span-2">
@@ -420,11 +463,11 @@ function ScoutDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Filter className="h-4 w-4 text-purple-600" /> AI Filtering Summary
+                  <Filter className="h-4 w-4 text-muted-foreground" /> AI Filtering Summary
                 </CardTitle>
                 <CardDescription>How AI reduces 11.8K scanned items into 584 actionable opportunities</CardDescription>
               </div>
-              <Badge variant="outline" className="bg-purple-50 border-purple-200 text-purple-700 text-[10px]">
+              <Badge variant="outline" className="bg-neutral-50 border-neutral-200 text-neutral-700 text-[10px]">
                 <Sparkles className="h-3 w-3 mr-1" /> Last 24h
               </Badge>
             </div>
@@ -442,7 +485,7 @@ function ScoutDashboard() {
                     <span className="text-[11px] text-muted-foreground tabular-nums">{f.pct}%</span>
                   </div>
                 </div>
-                <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div className="h-2 rounded-full bg-neutral-100 overflow-hidden">
                   <div className={`h-full ${f.color}`} style={{ width: `${f.pct}%` }} />
                 </div>
               </div>
@@ -451,16 +494,16 @@ function ScoutDashboard() {
               <div className="flex-1 flex items-center gap-3">
                 <div className="flex-1">
                   <div className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold mb-1">Signal vs Noise</div>
-                  <div className="h-3 rounded-full bg-slate-100 overflow-hidden flex">
-                    <div className="bg-green-500" style={{ width: "31%" }} />
-                    <div className="bg-amber-500" style={{ width: "53%" }} />
-                    <div className="bg-slate-300" style={{ width: "16%" }} />
+                  <div className="h-3 rounded-full bg-neutral-100 overflow-hidden flex">
+                    <div className="bg-[#30A566]" style={{ width: "31%" }} />
+                    <div className="bg-[#787877]" style={{ width: "53%" }} />
+                    <div className="bg-[#C9C7C7]" style={{ width: "16%" }} />
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-xs text-muted-foreground">Noise filtered</div>
-                <div className="text-lg font-bold tabular-nums text-slate-700">11,216</div>
+                <div className="text-lg font-bold tabular-nums text-neutral-700">11,216</div>
               </div>
             </div>
           </CardContent>
@@ -508,7 +551,7 @@ function ScoutDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Zap className="h-4 w-4 text-amber-500" /> Top Shortlisted Opportunities
+                <Zap className="h-4 w-4 text-[#30A566]" /> Top Shortlisted Opportunities
               </CardTitle>
               <CardDescription>Highest-ranked bids across all monitored portals, ready for Admin assignment</CardDescription>
             </div>
@@ -518,7 +561,7 @@ function ScoutDashboard() {
         <CardContent>
           <div className="overflow-hidden rounded-md border">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <thead className="bg-neutral-50 text-[11px] uppercase tracking-wider text-neutral-700">
                 <tr>
                   <th className="text-left px-4 py-2 font-semibold">Bid</th>
                   <th className="text-left px-4 py-2 font-semibold">Portal Source</th>
@@ -534,7 +577,7 @@ function ScoutDashboard() {
                   const close = new Date(b.closeDate);
                   const days = Math.max(0, Math.ceil((close.getTime() - Date.now()) / 86400000));
                   return (
-                    <tr key={b.id} className="border-t hover:bg-slate-50/60">
+                    <tr key={b.id} className="border-t even:bg-neutral-50/60 hover:bg-neutral-100/60 transition-colors">
                       <td className="px-4 py-3">
                         <div className="font-mono text-[11px] text-primary">{b.id}</div>
                         <div className="text-xs font-medium leading-tight line-clamp-1 mt-0.5">{b.title}</div>
@@ -543,15 +586,15 @@ function ScoutDashboard() {
                       <td className="px-4 py-3"><AIScorePill score={b.aiRelevanceScore} /></td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2 w-32">
-                          <div className="flex-1 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                            <div className={`h-full ${matchPct >= 80 ? "bg-green-500" : matchPct >= 50 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${matchPct}%` }} />
+                          <div className="flex-1 h-1.5 rounded-full bg-neutral-100 overflow-hidden">
+                            <div className={`h-full ${matchPct >= 80 ? "bg-[#30A566]" : matchPct >= 50 ? "bg-[#787877]" : "bg-[#DA291C]"}`} style={{ width: `${matchPct}%` }} />
                           </div>
                           <span className="text-[11px] font-semibold tabular-nums w-8 text-right">{matchPct}%</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="text-xs">{close.toLocaleDateString()}</div>
-                        <div className={`text-[10px] ${days <= 3 ? "text-red-600 font-semibold" : "text-muted-foreground"}`}>in {days} days</div>
+                        <div className={`text-[10px] ${days <= 3 ? "text-[#DA291C] font-semibold" : "text-muted-foreground"}`}>in {days} days</div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1.5">
@@ -559,7 +602,7 @@ function ScoutDashboard() {
                             <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5"><Eye className="h-3 w-3" /> View</Button>
                           </Link>
                           <Button size="sm" className="h-7 text-xs gap-1.5"
-                            onClick={() => toast.success(`${b.id} assigned to Admin`, { description: "Neeraj Sharma will be notified." })}>
+                            onClick={() => toast.success(`${b.id} assigned to Admin`, { description: "Adrian Suarez will be notified." })}>
                             <ArrowUpRight className="h-3 w-3" /> Assign
                           </Button>
                         </div>
@@ -630,8 +673,8 @@ function AEDashboard({ userName }: { userName: string }) {
                       <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5"><Building2 className="w-3 h-3" /> {b.customer}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <Badge className={`mb-2 ${b.goNoGoRecommendation === "Go" ? "bg-green-600" : b.goNoGoRecommendation === "Review" ? "bg-amber-500" : "bg-red-500"}`}>{b.goNoGoRecommendation}</Badge>
-                      <p className="text-xs text-muted-foreground">Risk: <span className="font-medium text-amber-700">{b.riskFlags.length > 0 ? "Medium" : "Low"}</span></p>
+                      <Badge className={`mb-2 ${b.goNoGoRecommendation === "Go" ? "bg-[#30A566] hover:bg-[#30A566]" : b.goNoGoRecommendation === "Review" ? "bg-[#787877] hover:bg-[#787877]" : "bg-[#DA291C] hover:bg-[#DA291C]"}`}>{b.goNoGoRecommendation}</Badge>
+                      <p className="text-xs text-muted-foreground">Risk: <span className="font-medium text-neutral-700">{b.riskFlags.length > 0 ? "Medium" : "Low"}</span></p>
                     </div>
                   </div>
                   <div className="mt-3 flex items-center justify-between gap-4">
@@ -651,7 +694,7 @@ function AEDashboard({ userName }: { userName: string }) {
               { title: "Top Opportunity", body: "BID-2026-001 — Jefferson County chassis. $450K. High strategic value, low risk.", tone: "neutral" as const },
               { title: "Attention Item", body: "3 bids expiring within 72h. Recommend prioritizing approval queue this morning.", tone: "warn" as const },
             ].map((c, i) => (
-              <Card key={i} className={`shadow-sm ${c.tone === "warn" ? "border-amber-200 bg-amber-50/30" : c.tone === "good" ? "border-green-200 bg-green-50/30" : ""}`}>
+              <Card key={i} className={`shadow-sm border-l-2 ${c.tone === "warn" ? "border-l-[#DA291C]" : c.tone === "good" ? "border-l-[#30A566]" : "border-l-neutral-300"}`}>
                 <CardContent className="p-4">
                   <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground mb-2">{c.title}</p>
                   <p className="text-sm leading-relaxed">{c.body}</p>

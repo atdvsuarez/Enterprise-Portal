@@ -12,43 +12,33 @@ interface KpiCardProps {
   className?: string;
 }
 
+// Map legacy color names → Cummins brand hexes
+const BRAND: Record<NonNullable<KpiCardProps["color"]>, string> = {
+  blue:   "#55A1D3", // Tide
+  green:  "#30A566", // Pasture
+  amber:  "#F1C194", // Canyon
+  red:    "#DA291C", // Cummins Red
+  purple: "#787877", // Gray (purple isn't part of the brand — map to neutral)
+  slate:  "#787877", // Gray
+};
+
 export function KpiCard({ title, value, icon: Icon, trend, trendUp, color = "blue", className }: KpiCardProps) {
-  const getBorderColor = () => {
-    switch(color) {
-      case "blue": return "border-l-blue-500";
-      case "green": return "border-l-green-500";
-      case "amber": return "border-l-amber-500";
-      case "red": return "border-l-red-500";
-      case "purple": return "border-l-purple-500";
-      default: return "border-l-slate-500";
-    }
-  };
-  
-  const getIconColors = () => {
-    switch(color) {
-      case "blue": return "text-blue-500 bg-blue-50 dark:bg-blue-900/20";
-      case "green": return "text-green-500 bg-green-50 dark:bg-green-900/20";
-      case "amber": return "text-amber-500 bg-amber-50 dark:bg-amber-900/20";
-      case "red": return "text-red-500 bg-red-50 dark:bg-red-900/20";
-      case "purple": return "text-purple-500 bg-purple-50 dark:bg-purple-900/20";
-      default: return "text-slate-500 bg-slate-50 dark:bg-slate-800";
-    }
-  };
+  const accent = BRAND[color];
 
   return (
-    <Card className={cn("border-l-4 shadow-sm", getBorderColor(), className)}>
+    <Card className={cn("shadow-sm border-l-2", className)} style={{ borderLeftColor: accent }}>
       <CardContent className="p-6">
         <div className="flex justify-between items-start">
           <div>
             <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <h3 className="text-3xl font-bold mt-2 tabular-nums">{value}</h3>
             {trend && (
-              <p className={cn("text-xs mt-1 font-medium", trendUp ? "text-green-600" : "text-muted-foreground")}>
+              <p className={cn("text-xs mt-1 font-medium", trendUp ? "text-[#1f7a4a]" : "text-muted-foreground")}>
                 {trend}
               </p>
             )}
           </div>
-          <div className={cn("p-2 rounded-md", getIconColors())}>
+          <div className="p-2 rounded-md" style={{ background: `${accent}1A`, color: accent }}>
             <Icon className="h-5 w-5" />
           </div>
         </div>

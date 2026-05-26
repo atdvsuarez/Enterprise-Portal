@@ -73,7 +73,7 @@ const generateBids = (): Bid[] => {
       inventoryStatus: ["Clear", "At Risk", "Blocked"][i % 3] as "Clear" | "At Risk" | "Blocked",
       leadTimeStatus: ["Standard", "Expedited", "Exception"][i % 3] as "Standard" | "Expedited" | "Exception",
       assignedScout: "Priya Iyer",
-      assignedAdmin: "Neeraj Sharma",
+      assignedAdmin: "Adrian Suarez",
       assignedAE: "Marcus Chen",
       notes: "Generated test bid data for portal simulation.",
       riskFlags: Math.random() > 0.5 ? ["Tight turnaround time", "Unknown competitor"] : [],

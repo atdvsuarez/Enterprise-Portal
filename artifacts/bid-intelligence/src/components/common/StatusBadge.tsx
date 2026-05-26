@@ -8,25 +8,29 @@ export function StatusBadge({ status, className }: { status: BidStatus | string;
       case "New":
       case "Ready for Response":
       case "Submitted":
-        return "text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
+        // In-progress / informational → Tide blue accent on neutral
+        return "text-[#2d6a8b] bg-[#55A1D3]/10 border-[#55A1D3]/30";
       case "Approved":
       case "Ready":
       case "Complete":
       case "Won":
-        return "text-green-600 bg-green-50 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800";
+        // Validated / good → Pasture green
+        return "text-[#1f7a4a] bg-[#30A566]/10 border-[#30A566]/30";
       case "Needs Review":
       case "Pending Approval":
       case "Customer Follow-up":
       case "Clarification Requested":
-        return "text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800";
+        // Attention but not blocked → neutral gray (avoid red overuse)
+        return "text-neutral-700 bg-neutral-100 border-neutral-300";
       case "Restricted":
       case "Exception":
       case "Rejected":
       case "Lost":
       case "Escalated":
-        return "text-red-600 bg-red-50 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800";
+        // Blocked / urgent → Cummins Red accent
+        return "text-[#DA291C] bg-[#DA291C]/10 border-[#DA291C]/30";
       default:
-        return "text-slate-600 bg-slate-50 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700";
+        return "text-neutral-600 bg-neutral-50 border-neutral-200";
     }
   };
 

@@ -7,7 +7,7 @@ export interface User {
 }
 
 export const USERS: Record<Role, User> = {
-  admin: { name: "Neeraj Sharma", role: "admin", title: "Bid Admin" },
+  admin: { name: "Adrian Suarez", role: "admin", title: "Bid Admin" },
   scout: { name: "Priya Iyer", role: "scout", title: "Bid Scout" },
   ae: { name: "Marcus Chen", role: "ae", title: "Account Executive" },
 };

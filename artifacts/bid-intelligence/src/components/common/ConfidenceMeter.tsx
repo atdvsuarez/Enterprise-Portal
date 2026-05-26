@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 
 export function ConfidenceMeter({ value, className }: { value: number; className?: string }) {
+  // Cummins palette: Pasture · Gray · Cummins Red
   const getColor = (v: number) => {
-    if (v >= 80) return "bg-green-500";
-    if (v >= 60) return "bg-amber-500";
-    return "bg-red-500";
+    if (v >= 80) return "bg-[#30A566]";
+    if (v >= 60) return "bg-[#787877]";
+    return "bg-[#DA291C]";
   };
 
   const v = Math.max(0, Math.min(100, value));

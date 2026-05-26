@@ -1,0 +1,174 @@
+Refine the application styling, structure, and interaction quality.
+
+Do NOT add new major features. Focus on improving clarity, design consistency, and usability.
+
+-------------------------------------
+1. COLOR SYSTEM (STRICT CUMMINS BRAND ALIGNMENT)
+-------------------------------------
+
+Adopt the official Cummins brand palette exactly:
+
+PRIMARY BRAND COLOR:
+- Cummins Red: HEX #DA291C (RGB 218, 41, 28)
+
+CORE NEUTRALS (PRIMARY UI COLORS):
+- Black: HEX #000000
+- White: HEX #FFFFFF
+
+SUPPORTING NEUTRALS:
+- Asphalt: HEX #2A2A2A
+- Dark Gray: HEX #474747
+- Gray: HEX #787877
+- Light Gray: HEX #C9C7C7
+- Platinum: HEX #E0E0DF
+
+OPTIONAL ACCENTS (USE VERY SPARINGLY):
+- Pasture (green): HEX #30A566
+- Tide (blue): HEX #55A1D3
+- Canyon (orange): HEX #F1C194
+
+Do NOT create custom shades or additional colors.
+
+-------------------------------------
+2. COLOR USAGE RULES (CRITICAL)
+-------------------------------------
+
+Follow Cummins brand standards:
+
+- Cummins Red is a strategic accent color, not a base color
+- Use Red ONLY for:
+  - primary buttons (e.g., “Fetch Summary”, “Approve”)
+  - alerts / warnings
+  - key highlights (e.g., AI recommendation, “Needs Attention”)
+
+- Most text should be:
+  - black (#000000) on light backgrounds
+  - white (#FFFFFF) on dark backgrounds
+
+- Backgrounds:
+  - use white or very light gray for content areas
+  - use dark tones ONLY for navigation (not main content)
+
+-------------------------------------
+3. MICRO-CORRECTION (VERY IMPORTANT)
+-------------------------------------
+
+Reduce overuse of Cummins Red.
+
+- Do NOT use red for large backgrounds or entire sections
+- Limit red to small, intentional UI elements only
+- Increase use of:
+  - white space
+  - neutral greys
+  - black text
+
+The UI should feel clean, minimal, and balanced — not saturated with red
+
+-------------------------------------
+4. NAVIGATION + LAYOUT APPLICATION
+-------------------------------------
+
+- Left navigation:
+  - dark background (black or asphalt)
+  - light text (white or light gray)
+  - active item highlighted subtly with red accent (not full red fill)
+
+- Main content:
+  - white background
+  - light gray cards
+
+- Cards:
+  - white or very light gray
+  - subtle shadows or borders
+
+-------------------------------------
+5. DASHBOARD VISUAL HIERARCHY
+-------------------------------------
+
+Improve clarity of layout:
+
+- Top section:
+  Daily Bids Intake Overview (highest priority)
+
+- Middle section:
+  Central Bid Team (CBT) Portal Intelligence
+
+- Bottom section:
+  Action Queue
+
+Use:
+- clear section headers
+- consistent spacing
+- card-based grouping
+
+-------------------------------------
+6. CBT VISUAL IMPROVEMENT
+-------------------------------------
+
+Enhance CBT dashboard:
+
+- Add a funnel visualization:
+  “1000+ portals → filtered → shortlisted”
+
+- Use color appropriately:
+  - green (Pasture) = high signal / strong opportunities
+  - gray = neutral / medium
+  - muted tones = low signal / noise
+
+- Avoid red here unless indicating risk or blocked issues
+
+-------------------------------------
+7. DATA TABLE IMPROVEMENTS
+-------------------------------------
+
+- Use subtle row striping (light gray)
+- Increase padding for readability
+- Strong column headers (dark text)
+- Avoid heavy borders
+
+-------------------------------------
+8. ROLE-BASED VISUAL DISTINCTION
+-------------------------------------
+
+Admin:
+- detailed, action-heavy UI
+
+Scout:
+- analytics-heavy
+- signal vs noise visuals
+
+AE:
+- simplified, minimal, executive view
+- avoid operational clutter
+
+-------------------------------------
+9. MICRO-INTERACTIONS
+-------------------------------------
+
+Add:
+- hover states
+- loading indicators (for AI actions)
+- status badges:
+  - red → urgent / blocked
+  - green → completed / validated
+  - gray → neutral / in progress
+
+-------------------------------------
+10. UX CLEANUP
+-------------------------------------
+
+- remove redundant buttons
+- ensure consistent naming
+- simplify overly dense areas
+- maintain clean whitespace
+
+-------------------------------------
+FINAL GOAL
+-------------------------------------
+
+The application should feel like a real Cummins enterprise product:
+
+- bold but controlled use of red
+- strong use of white and neutral colors
+- minimalistic and structured layout
+- credible for client and executive demos
