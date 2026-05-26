@@ -1,25 +1,51 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useSearch } from "wouter";
 import { mockBids } from "@/data/mock";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { AIScorePill } from "@/components/common/AIScorePill";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
+const SOURCES = ["All", "Email", "Excel", "External URL", "Portal"] as const;
+const FILTERS = ["All", "New", "Needs Review", "Ready for Response", "Pending Approval", "Submitted", "Blocked / Exception"] as const;
 
 export default function BidMonitor() {
   const [, setLocation] = useLocation();
-  const [filter, setFilter] = useState("All");
+  const searchString = useSearch();
+  const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
+
+  const initialStatus = params.get("status") ?? "All";
+  const initialSource = params.get("source") ?? "All";
+
+  const [filter, setFilter] = useState<string>(initialStatus);
+  const [sourceFilter, setSourceFilter] = useState<string>(initialSource);
   const [search, setSearch] = useState("");
 
-  const filters = ["All", "New", "Needs Review", "Ready for Response", "Pending Approval", "Submitted", "Restricted", "Exception"];
+  useEffect(() => {
+    setFilter(params.get("status") ?? "All");
+    setSourceFilter(params.get("source") ?? "All");
+  }, [params]);
 
   const filteredBids = mockBids.filter(bid => {
-    if (filter !== "All" && bid.status !== filter) return false;
+    if (filter !== "All") {
+      if (filter === "Blocked / Exception") {
+        if (bid.status !== "Exception" && bid.status !== "Restricted") return false;
+      } else if (bid.status !== filter) return false;
+    }
+    if (sourceFilter !== "All" && bid.sourceType !== sourceFilter) return false;
     if (search && !bid.title.toLowerCase().includes(search.toLowerCase()) && !bid.customer.toLowerCase().includes(search.toLowerCase()) && !bid.id.toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   });
+
+  const activeFilters = (filter !== "All" || sourceFilter !== "All");
+  const clearFilters = () => {
+    setFilter("All");
+    setSourceFilter("All");
+    setLocation("/monitor");
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto space-y-6">
@@ -28,11 +54,12 @@ export default function BidMonitor() {
         <p className="text-muted-foreground mt-1">Track and manage all bids across the pipeline.</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="flex flex-wrap gap-2">
-          {filters.map(f => (
-            <Badge 
-              key={f} 
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mr-1">Status</span>
+          {FILTERS.map(f => (
+            <Badge
+              key={f}
               variant={filter === f ? "default" : "outline"}
               className="cursor-pointer hover:bg-secondary transition-colors"
               onClick={() => setFilter(f)}
@@ -41,6 +68,27 @@ export default function BidMonitor() {
             </Badge>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mr-1">Source</span>
+          {SOURCES.map(s => (
+            <Badge
+              key={s}
+              variant={sourceFilter === s ? "default" : "outline"}
+              className="cursor-pointer hover:bg-secondary transition-colors"
+              onClick={() => setSourceFilter(s)}
+            >
+              {s}
+            </Badge>
+          ))}
+          {activeFilters && (
+            <Button variant="ghost" size="sm" className="h-6 text-xs gap-1 ml-2" onClick={clearFilters}>
+              <X className="h-3 w-3" /> Clear filters
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex justify-end">
         <div className="relative w-full sm:w-72 shrink-0">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 

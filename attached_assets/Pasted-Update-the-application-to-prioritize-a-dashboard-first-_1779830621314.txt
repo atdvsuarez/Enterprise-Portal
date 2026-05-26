@@ -1,0 +1,138 @@
+Update the application to prioritize a dashboard-first operational experience.
+
+Do NOT rebuild the app from scratch. Modify and enhance the existing structure.
+
+-------------------------------------
+PRIMARY CHANGE: DASHBOARD-FIRST UX
+-------------------------------------
+
+Remove the idea that users must navigate to “Bid Intake” first.
+
+Instead, users should land on a Dashboard that immediately shows:
+
+- what came into the system
+- what needs attention
+- what actions to take next
+
+-------------------------------------
+1. DAILY BIDS INTAKE OVERVIEW (TOP SECTION)
+-------------------------------------
+
+Replace standalone intake screens with a summarized intake view.
+
+Display 3 KPI cards for ingestion patterns:
+
+1. Email Intake
+2. Excel Intake
+3. External URL Intake
+
+Each card must show:
+- number of new bids
+- number processed
+- number pending or failed
+- latest activity timestamp
+
+Each card must include actions:
+- View Details
+- Fetch Summary (AI summary of latest bid)
+- Fetch Pricing (simulate pricing lookup)
+- Re-run or Validate
+
+Include a "Latest Bid" preview inside at least one card.
+
+-------------------------------------
+2. CENTRAL BID TEAM (CBT) – PORTAL INTELLIGENCE
+-------------------------------------
+
+Replace simple portal cards with an aggregated intelligence dashboard.
+
+The CBT works across 1000+ portals, so the UI should NOT show individual portals by default.
+
+Instead, create a "Portal Intelligence Dashboard" with:
+
+A. TIERED PORTAL OVERVIEW
+
+Group portals into:
+- Tier 1 (High Signal / High Value)
+- Tier 2 (Moderate Signal)
+- Tier 3 (Low Signal / High Noise)
+
+For each tier show:
+- number of portals
+- number of opportunities detected
+- number of relevant opportunities after AI filtering
+- visual signal indicator
+
+B. AI FILTERING SUMMARY
+
+Show how AI reduces noise:
+- High Confidence opportunities
+- Medium Confidence
+- Low Confidence (filtered out)
+
+Use clear visual separation between signal and noise.
+
+C. TOP SHORTLISTED OPPORTUNITIES
+
+Show top ranked bids:
+
+Each item:
+- bid title
+- portal source
+- AI score
+- match quality
+- close date
+
+Actions:
+- View Details
+- Assign to Admin
+
+D. PORTAL HEALTH
+
+Show distribution:
+- Structured portals
+- Login required
+- High noise
+- Restricted
+
+-------------------------------------
+3. ACTION QUEUE (THIRD SECTION)
+-------------------------------------
+
+Display workload:
+
+- Needs Review
+- Ready for Response
+- Pending Approval (AE)
+- Blocked / Exception
+
+Each should be clickable.
+
+-------------------------------------
+4. ROLE BEHAVIOR
+-------------------------------------
+
+Admin (Daily Bids):
+- sees full intake overview
+- primary operational user
+
+Scout:
+- sees CBT portal intelligence dashboard
+- focuses on filtering and discovery
+
+AE:
+- sees simplified dashboard with:
+  - approval queue
+  - summary metrics
+- should NOT see ingestion details
+
+Ensure dashboard changes slightly based on role.
+
+-------------------------------------
+UX RULES
+-------------------------------------
+
+- Do not force navigation before showing system state
+- Make dashboard feel like an operations command center
+- Focus on “what happened” and “what needs action”
+- Keep flows direct and intuitive
