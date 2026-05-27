@@ -1,0 +1,113 @@
+Update the “Bid Monitor” page to simplify it into a clean working list for the Daily Bids Team.
+
+Do NOT redesign the full system. Only adjust this page.
+
+-------------------------------------
+PRIMARY GOAL
+-------------------------------------
+
+This page should show a simple table of all bids for the day.
+
+It should help users quickly:
+- scan bids
+- identify work
+- take action
+
+It should NOT feel like a complex analytics or pipeline screen.
+
+-------------------------------------
+1. TABLE STRUCTURE
+-------------------------------------
+
+Keep ONLY the following columns:
+
+- Bid Title
+- Customer
+- Source (Email / Excel / URL)
+- Portal
+- Status
+- Assigned To
+- Action
+
+-------------------------------------
+2. COLUMN RULES
+-------------------------------------
+
+Portal:
+- Only populate if Source = External URL
+- If Source = Email or Excel, display “N/A”
+
+-------------------------------------
+3. REMOVE THESE COLUMNS
+-------------------------------------
+
+- Remove Bid ID
+- Remove Stage
+- Remove AI Score
+- Remove Parts (Matched / Unmatched)
+
+These are too detailed for this page.
+
+-------------------------------------
+4. STATUS SIMPLIFICATION
+-------------------------------------
+
+Replace all status types with ONLY:
+
+- Pending
+- Processed
+
+This simplifies the workflow and improves clarity.
+
+-------------------------------------
+5. ASSIGNED COLUMN (IMPORTANT)
+-------------------------------------
+
+Make “Assigned To” an editable field.
+
+Users should be able to:
+- select from a dropdown list of users
+- assign or reassign a bid
+
+Also allow:
+- adding a new user to the list if needed
+
+This should behave like a simple inline editable field.
+
+-------------------------------------
+6. ROW ACTIONS (SIMPLIFY)
+-------------------------------------
+
+For each row, include ONLY these actions:
+
+- Open
+- Fetch Summary
+- Fetch Pricing
+
+Remove all other actions.
+
+Keep actions minimal and consistent across rows.
+
+-------------------------------------
+7. UX PRINCIPLES
+-------------------------------------
+
+- Make the table easy to scan
+- Reduce clutter and unnecessary data
+- Focus on operational workflow
+- Avoid overwhelming users with too many options
+
+-------------------------------------
+FINAL RESULT
+-------------------------------------
+
+This page should feel like:
+
+“A clean working queue of Daily Bids”
+
+NOT:
+
+“A complex data dashboard”
+
+Keep it simple, structured, and fast to use.
+-------------------------------------

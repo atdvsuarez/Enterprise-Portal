@@ -1,98 +1,224 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation, useSearch } from "wouter";
+import { useMemo, useState } from "react";
+import { useLocation } from "wouter";
 import { mockBids } from "@/data/mock";
-import { StatusBadge } from "@/components/common/StatusBadge";
-import { AIScorePill } from "@/components/common/AIScorePill";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { Search, ExternalLink, FileText, DollarSign, UserPlus, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
-const SOURCES = ["All", "Email", "Excel", "External URL", "Portal"] as const;
-const FILTERS = ["All", "New", "Needs Review", "Ready for Response", "Pending Approval", "Submitted", "Blocked / Exception"] as const;
+const DEFAULT_USERS = [
+  "Adrian Suarez",
+  "Priya Iyer",
+  "Marcus Chen",
+  "Jordan Park",
+  "Sam Rivera",
+];
 
-export default function BidMonitor() {
-  const [, setLocation] = useLocation();
-  const searchString = useSearch();
-  const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
+type SimpleStatus = "Pending" | "Processed";
 
-  const initialStatus = params.get("status") ?? "All";
-  const initialSource = params.get("source") ?? "All";
+function simplify(status: string): SimpleStatus {
+  return status === "Submitted" ? "Processed" : "Pending";
+}
 
-  const [filter, setFilter] = useState<string>(initialStatus);
-  const [sourceFilter, setSourceFilter] = useState<string>(initialSource);
-  const [search, setSearch] = useState("");
+function sourceLabel(s: string): string {
+  if (s === "External URL") return "URL";
+  if (s === "Portal") return "URL";
+  return s;
+}
 
-  useEffect(() => {
-    setFilter(params.get("status") ?? "All");
-    setSourceFilter(params.get("source") ?? "All");
-  }, [params]);
+function StatusPill({ status }: { status: SimpleStatus }) {
+  const isProcessed = status === "Processed";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium",
+        isProcessed
+          ? "bg-[#E8F5EE] text-[#1f7a4a]"
+          : "bg-neutral-100 text-neutral-700"
+      )}
+    >
+      <span className={cn("w-1.5 h-1.5 rounded-full", isProcessed ? "bg-[#30A566]" : "bg-neutral-400")} />
+      {status}
+    </span>
+  );
+}
 
-  const filteredBids = mockBids.filter(bid => {
-    if (filter !== "All") {
-      if (filter === "Blocked / Exception") {
-        if (bid.status !== "Exception" && bid.status !== "Restricted") return false;
-      } else if (bid.status !== filter) return false;
-    }
-    if (sourceFilter !== "All" && bid.sourceType !== sourceFilter) return false;
-    if (search && !bid.title.toLowerCase().includes(search.toLowerCase()) && !bid.customer.toLowerCase().includes(search.toLowerCase()) && !bid.id.toLowerCase().includes(search.toLowerCase())) return false;
-    return true;
-  });
+function AssigneeSelect({
+  value,
+  users,
+  onChange,
+  onAddUser,
+}: {
+  value: string;
+  users: string[];
+  onChange: (v: string) => void;
+  onAddUser: (name: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [newName, setNewName] = useState("");
 
-  const activeFilters = (filter !== "All" || sourceFilter !== "All");
-  const clearFilters = () => {
-    setFilter("All");
-    setSourceFilter("All");
-    setLocation("/monitor");
+  const commitNew = () => {
+    const name = newName.trim();
+    if (!name) return;
+    onAddUser(name);
+    onChange(name);
+    setNewName("");
+    setAdding(false);
+    setOpen(false);
+    toast.success(`Added ${name} and assigned this bid.`);
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-[1600px] mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Bid Monitor</h1>
-        <p className="text-muted-foreground mt-1">Track and manage all bids across the pipeline.</p>
+    <Popover open={open} onOpenChange={(o) => { setOpen(o); if (!o) setAdding(false); }}>
+      <PopoverTrigger asChild>
+        <button
+          onClick={(e) => e.stopPropagation()}
+          className="text-xs px-2 py-1 rounded border border-transparent hover:border-border hover:bg-muted/60 transition-colors text-left w-full max-w-[160px] truncate"
+        >
+          {value || <span className="text-muted-foreground italic">Unassigned</span>}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-60 p-0" align="start" onClick={(e) => e.stopPropagation()}>
+        {adding ? (
+          <div className="p-2 space-y-2">
+            <Input
+              autoFocus
+              placeholder="New user name…"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commitNew();
+                if (e.key === "Escape") { setAdding(false); setNewName(""); }
+              }}
+              className="h-8 text-xs"
+            />
+            <div className="flex gap-1 justify-end">
+              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setAdding(false); setNewName(""); }}>
+                Cancel
+              </Button>
+              <Button size="sm" className="h-7 text-xs" onClick={commitNew}>
+                Add & Assign
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Command>
+            <CommandInput placeholder="Search users…" className="h-9" />
+            <CommandList>
+              <CommandEmpty>No users found.</CommandEmpty>
+              <CommandGroup>
+                {users.map((u) => (
+                  <CommandItem
+                    key={u}
+                    value={u}
+                    onSelect={() => { onChange(u); setOpen(false); }}
+                    className="text-xs"
+                  >
+                    <Check className={cn("mr-2 h-3 w-3", value === u ? "opacity-100" : "opacity-0")} />
+                    {u}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+              <CommandSeparator />
+              <CommandGroup>
+                <CommandItem onSelect={() => setAdding(true)} className="text-xs text-primary">
+                  <UserPlus className="mr-2 h-3 w-3" />
+                  Add new user…
+                </CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+const FILTERS: ("All" | SimpleStatus)[] = ["All", "Pending", "Processed"];
+
+export default function BidMonitor() {
+  const [, setLocation] = useLocation();
+  const [filter, setFilter] = useState<"All" | SimpleStatus>("All");
+  const [search, setSearch] = useState("");
+  const [users, setUsers] = useState<string[]>(DEFAULT_USERS);
+  const [assignments, setAssignments] = useState<Record<string, string>>(() =>
+    Object.fromEntries(mockBids.map((b) => [b.id, b.assignedAdmin ?? "Adrian Suarez"]))
+  );
+
+  const rows = useMemo(() => {
+    return mockBids
+      .map((b) => ({
+        id: b.id,
+        title: b.title,
+        customer: b.customer,
+        source: sourceLabel(b.sourceType),
+        rawSource: b.sourceType,
+        portal: b.sourceType === "External URL" ? (b.portalName || "—") : "N/A",
+        status: simplify(b.status),
+        assignee: assignments[b.id] ?? "",
+      }))
+      .filter((r) => {
+        if (filter !== "All" && r.status !== filter) return false;
+        if (search) {
+          const q = search.toLowerCase();
+          if (!r.title.toLowerCase().includes(q) && !r.customer.toLowerCase().includes(q)) return false;
+        }
+        return true;
+      });
+  }, [assignments, filter, search]);
+
+  const setAssignee = (id: string, name: string) => {
+    setAssignments((prev) => ({ ...prev, [id]: name }));
+    toast.success(`Assigned to ${name}.`);
+  };
+
+  const addUser = (name: string) => {
+    setUsers((prev) => (prev.includes(name) ? prev : [...prev, name]));
+  };
+
+  const counts = useMemo(() => {
+    const pending = mockBids.filter((b) => simplify(b.status) === "Pending").length;
+    const processed = mockBids.length - pending;
+    return { pending, processed, total: mockBids.length };
+  }, []);
+
+  return (
+    <div className="p-4 md:p-8 max-w-[1500px] mx-auto space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Bid Monitor</h1>
+          <p className="text-muted-foreground mt-1">Today's working queue — scan, assign, and process.</p>
+        </div>
+        <div className="flex items-center gap-4 text-sm">
+          <span className="text-muted-foreground">Total <span className="font-semibold text-foreground tabular-nums">{counts.total}</span></span>
+          <span className="text-muted-foreground">Pending <span className="font-semibold text-foreground tabular-nums">{counts.pending}</span></span>
+          <span className="text-muted-foreground">Processed <span className="font-semibold text-foreground tabular-nums">{counts.processed}</span></span>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mr-1">Status</span>
-          {FILTERS.map(f => (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          {FILTERS.map((f) => (
             <Badge
               key={f}
               variant={filter === f ? "default" : "outline"}
-              className="cursor-pointer hover:bg-secondary transition-colors"
+              className="cursor-pointer hover:bg-secondary transition-colors px-3 py-1"
               onClick={() => setFilter(f)}
             >
               {f}
             </Badge>
           ))}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mr-1">Source</span>
-          {SOURCES.map(s => (
-            <Badge
-              key={s}
-              variant={sourceFilter === s ? "default" : "outline"}
-              className="cursor-pointer hover:bg-secondary transition-colors"
-              onClick={() => setSourceFilter(s)}
-            >
-              {s}
-            </Badge>
-          ))}
-          {activeFilters && (
-            <Button variant="ghost" size="sm" className="h-6 text-xs gap-1 ml-2" onClick={clearFilters}>
-              <X className="h-3 w-3" /> Clear filters
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="flex justify-end">
-        <div className="relative w-full sm:w-72 shrink-0">
+        <div className="relative w-full sm:w-72">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search bids..." 
+          <Input
+            placeholder="Search bids…"
             className="pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -104,45 +230,78 @@ export default function BidMonitor() {
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/50">
-              <TableHead className="w-[120px]">Bid ID</TableHead>
-              <TableHead className="w-[250px]">Title</TableHead>
+              <TableHead className="w-[320px]">Bid Title</TableHead>
               <TableHead>Customer</TableHead>
-              <TableHead>Source</TableHead>
+              <TableHead className="w-[90px]">Source</TableHead>
               <TableHead>Portal</TableHead>
-              <TableHead>Stage</TableHead>
-              <TableHead className="text-center">AI Score</TableHead>
-              <TableHead className="text-center">Parts (M/U)</TableHead>
-              <TableHead>Assigned</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead className="w-[110px]">Status</TableHead>
+              <TableHead className="w-[180px]">Assigned To</TableHead>
+              <TableHead className="text-right w-[280px]">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredBids.map((bid) => (
+            {rows.map((r) => (
               <TableRow
-                key={bid.id}
-                className="cursor-pointer even:bg-neutral-50/60 hover:bg-neutral-100/70 transition-colors"
-                onClick={() => setLocation(`/evaluation/${bid.id}`)}
+                key={r.id}
+                className="even:bg-neutral-50/60 hover:bg-neutral-100/70 transition-colors"
               >
-                <TableCell className="font-mono text-xs font-medium text-primary py-3">{bid.id}</TableCell>
-                <TableCell className="truncate max-w-[250px] py-3" title={bid.title}>{bid.title}</TableCell>
-                <TableCell className="py-3">{bid.customer}</TableCell>
-                <TableCell className="py-3"><span className="text-xs bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded">{bid.sourceType}</span></TableCell>
-                <TableCell className="text-xs text-muted-foreground py-3">{bid.portalName || "—"}</TableCell>
-                <TableCell className="text-xs py-3">{bid.pipelineStage}</TableCell>
-                <TableCell className="text-center py-3"><AIScorePill score={bid.aiRelevanceScore} /></TableCell>
-                <TableCell className="text-center tabular-nums text-xs py-3">
-                  <span className="text-[#1f7a4a] font-medium">{bid.matchedParts}</span>
-                  <span className="text-muted-foreground mx-1">/</span>
-                  <span className={bid.unmatchedParts > 0 ? "text-[#DA291C] font-medium" : "text-muted-foreground"}>{bid.unmatchedParts}</span>
+                <TableCell className="font-medium py-3 truncate max-w-[320px]" title={r.title}>
+                  {r.title}
                 </TableCell>
-                <TableCell className="text-xs py-3">{bid.assignedAdmin}</TableCell>
-                <TableCell className="py-3"><StatusBadge status={bid.status} /></TableCell>
+                <TableCell className="py-3">{r.customer}</TableCell>
+                <TableCell className="py-3">
+                  <span className="text-xs bg-neutral-100 text-neutral-700 px-2 py-0.5 rounded">{r.source}</span>
+                </TableCell>
+                <TableCell className="py-3 text-xs">
+                  {r.portal === "N/A" ? (
+                    <span className="text-muted-foreground italic">N/A</span>
+                  ) : (
+                    <span className="text-muted-foreground">{r.portal}</span>
+                  )}
+                </TableCell>
+                <TableCell className="py-3"><StatusPill status={r.status} /></TableCell>
+                <TableCell className="py-3">
+                  <AssigneeSelect
+                    value={r.assignee}
+                    users={users}
+                    onChange={(v) => setAssignee(r.id, v)}
+                    onAddUser={addUser}
+                  />
+                </TableCell>
+                <TableCell className="py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-xs gap-1"
+                      onClick={() => setLocation(`/evaluation/${r.id}`)}
+                    >
+                      <ExternalLink className="h-3 w-3" /> Open
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-xs gap-1"
+                      onClick={() => toast.success(`Summary fetched for ${r.id}.`)}
+                    >
+                      <FileText className="h-3 w-3" /> Summary
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 px-2 text-xs gap-1"
+                      onClick={() => toast.success(`Pricing fetched for ${r.id}.`)}
+                    >
+                      <DollarSign className="h-3 w-3" /> Pricing
+                    </Button>
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
-            {filteredBids.length === 0 && (
+            {rows.length === 0 && (
               <TableRow>
-                <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
-                  No bids found matching the current filters.
+                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                  No bids match the current filters.
                 </TableCell>
               </TableRow>
             )}
