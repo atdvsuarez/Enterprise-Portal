@@ -1,0 +1,97 @@
+Update the Dashboard page to simplify it into a clean operational summary for the Daily Bids Team.
+
+This is NOT a redesign of the entire app. Only simplify and restructure the Dashboard.
+
+-------------------------------------
+PRIMARY GOAL
+-------------------------------------
+
+The Dashboard should answer 3 questions only:
+
+- How many new bids came in today?
+- How many are still pending?
+- How many have been submitted?
+
+It should NOT be action-heavy.
+
+-------------------------------------
+1. TOP SECTION: TODAY AT A GLANCE
+-------------------------------------
+
+Move “Today at a Glance” to the top of the page.
+
+Keep ONLY:
+- New Bids Today (primary KPI)
+
+Remove all other KPI boxes:
+- Ready for Review
+- Drafts in Progress
+- Approvals Pending
+
+-------------------------------------
+2. DAILY BIDS INTAKE OVERVIEW
+-------------------------------------
+
+Keep the 3 intake cards:
+
+- Email Intake
+- Excel Intake
+- External URL Intake
+
+Each card must show ONLY:
+- New bids
+- Pending bids
+- Submitted bids
+
+-------------------------------------
+REMOVE FROM EACH CARD
+-------------------------------------
+
+- Remove “Failed” counts
+- Remove latest bid preview
+- Remove “Fetch Summary”
+- Remove “Fetch Pricing”
+
+-------------------------------------
+CARD ACTIONS
+-------------------------------------
+
+Each card should have ONLY ONE button:
+
+- “View Details”
+
+This button should navigate to the bid list for that intake type.
+
+-------------------------------------
+3. GLOBAL ACTION AREA
+-------------------------------------
+
+Remove duplicate action buttons from each card.
+
+Instead, add ONE central action button on the page:
+
+- “Re-Run Intake”
+
+Place this button in a dedicated area (top-right or below KPI section).
+
+-------------------------------------
+4. REMOVE SECTIONS COMPLETELY
+-------------------------------------
+
+Delete the following sections entirely:
+
+- Action Queue
+  (Needs Review, Ready for Response, Pending Approval, Blocked/Exception)
+
+- Needs Attention section
+
+-------------------------------------
+5. REMOVE UI ELEMENTS
+-------------------------------------
+
+Remove:
+- Notification bell icon
+- Search bar
+
+-------------------------------------
+

@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 export default function Dashboard() {
   const { role, user } = useRole();
-  if (role === "daily") return <AdminDashboard />;
+  if (role === "daily") return <DailyDashboard />;
   if (role === "admin") return <AdminDashboard />;
   if (role === "scout") return <ScoutDashboard />;
   return <AEDashboard userName={user.name} />;
@@ -285,6 +285,167 @@ function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+    </div>
+  );
+}
+
+/* ===================== DAILY BIDS TEAM — Operational Summary ===================== */
+function DailyDashboard() {
+  const bySource = (src: "Email" | "Excel" | "External URL") =>
+    mockBids.filter((b) => b.sourceType === src);
+
+  const bucket = (bids: typeof mockBids) => {
+    const submitted = bids.filter((b) => b.status === "Submitted").length;
+    const pending = bids.length - submitted;
+    return { newCount: bids.length, pending, submitted };
+  };
+
+  const allBids = mockBids;
+  const totalNew = allBids.length;
+  const totalSubmitted = allBids.filter((b) => b.status === "Submitted").length;
+  const totalPending = totalNew - totalSubmitted;
+
+  const intake = [
+    {
+      key: "email",
+      title: "Email Intake",
+      icon: Mail,
+      accent: "#55A1D3",
+      source: "Email" as const,
+      ...bucket(bySource("Email")),
+    },
+    {
+      key: "excel",
+      title: "Excel Intake",
+      icon: FileSpreadsheet,
+      accent: "#30A566",
+      source: "Excel" as const,
+      ...bucket(bySource("Excel")),
+    },
+    {
+      key: "url",
+      title: "External URL Intake",
+      icon: Link2,
+      accent: "#787877",
+      source: "External URL" as const,
+      ...bucket(bySource("External URL")),
+    },
+  ];
+
+  return (
+    <div className="p-4 md:p-8 space-y-8 max-w-[1500px] mx-auto">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Today at a Glance</h1>
+          <p className="text-muted-foreground mt-1">A quick look at today's bid activity.</p>
+        </div>
+        <Button
+          className="gap-2"
+          onClick={() =>
+            toast.success("Intake re-run started", {
+              description: "Refetching from Email, Excel, and External URL sources.",
+            })
+          }
+        >
+          <RefreshCw className="h-4 w-4" /> Re-Run Intake
+        </Button>
+      </div>
+
+      {/* Single primary KPI + supporting counts */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="shadow-sm border-l-4" style={{ borderLeftColor: "#DA291C" }}>
+          <CardContent className="py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">New Bids Today</p>
+                <p className="text-4xl font-bold tabular-nums mt-1">{totalNew}</p>
+              </div>
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Activity className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardContent className="py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Pending</p>
+                <p className="text-4xl font-bold tabular-nums mt-1 text-neutral-700">{totalPending}</p>
+              </div>
+              <div className="w-12 h-12 rounded-lg bg-neutral-100 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-neutral-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm">
+          <CardContent className="py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Submitted</p>
+                <p className="text-4xl font-bold tabular-nums mt-1 text-[#1f7a4a]">{totalSubmitted}</p>
+              </div>
+              <div className="w-12 h-12 rounded-lg bg-[#E8F5EE] flex items-center justify-center">
+                <CheckCircle className="h-6 w-6 text-[#30A566]" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Daily Bids Intake Overview */}
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold tracking-tight">Daily Bids Intake Overview</h2>
+          <p className="text-sm text-muted-foreground">Bids ingested by channel in the last 24h.</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {intake.map((card) => {
+            const Icon = card.icon;
+            return (
+              <Card key={card.key} className="shadow-sm border-l-2" style={{ borderLeftColor: card.accent }}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ background: `${card.accent}1A` }}
+                    >
+                      <Icon className="h-5 w-5" style={{ color: card.accent }} />
+                    </div>
+                    <CardTitle className="text-base">{card.title}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-md border border-neutral-200 bg-neutral-50 py-2">
+                      <div className="text-lg font-bold tabular-nums text-foreground">{card.newCount}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">New</div>
+                    </div>
+                    <div className="rounded-md border border-neutral-200 bg-neutral-50 py-2">
+                      <div className="text-lg font-bold tabular-nums text-neutral-700">{card.pending}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Pending</div>
+                    </div>
+                    <div className="rounded-md border border-neutral-200 bg-neutral-50 py-2">
+                      <div className="text-lg font-bold tabular-nums text-[#1f7a4a]">{card.submitted}</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Submitted</div>
+                    </div>
+                  </div>
+
+                  <Link href={`/monitor?source=${card.source}`}>
+                    <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
+                      <Eye className="h-3.5 w-3.5" /> View Details
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 }
