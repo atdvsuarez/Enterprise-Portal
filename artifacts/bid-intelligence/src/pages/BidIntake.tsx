@@ -9,7 +9,7 @@ import { CheckCircle2, FileText, Database, Globe, Loader2, ArrowRight } from "lu
 import { PortalTypeBadge } from "@/components/common/PortalTypeBadge";
 import { Link } from "wouter";
 
-export default function BidIntake() {
+export default function BidIntake({ embedded = false }: { embedded?: boolean } = {}) {
   const [activeTab, setActiveTab] = useState("email");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
@@ -50,11 +50,13 @@ export default function BidIntake() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Bid Intake</h1>
-        <p className="text-muted-foreground mt-1">Manually ingest bids via text, document, or external link.</p>
-      </div>
+    <div className={embedded ? "space-y-6" : "p-4 md:p-8 max-w-6xl mx-auto space-y-6"}>
+      {!embedded && (
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Bid Intake</h1>
+          <p className="text-muted-foreground mt-1">Manually ingest bids via text, document, or external link.</p>
+        </div>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-3">

@@ -1,4 +1,4 @@
-export type Role = "admin" | "scout" | "ae";
+export type Role = "daily" | "admin" | "scout" | "ae";
 
 export interface User {
   name: string;
@@ -7,6 +7,7 @@ export interface User {
 }
 
 export const USERS: Record<Role, User> = {
+  daily: { name: "Adrian Suarez", role: "daily", title: "Daily Bids Team" },
   admin: { name: "Adrian Suarez", role: "admin", title: "Bid Admin" },
   scout: { name: "Priya Iyer", role: "scout", title: "Bid Scout" },
   ae: { name: "Marcus Chen", role: "ae", title: "Account Executive" },

@@ -1,8 +1,8 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster as SonnerToaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { RoleProvider } from "@/lib/role";
+import { RoleProvider, useRole } from "@/lib/role";
 import { AppShell } from "@/layouts/AppShell";
 
 import NotFound from "@/pages/not-found";
@@ -18,26 +18,36 @@ import KnowledgeBase from "@/pages/KnowledgeBase";
 import PostSubmission from "@/pages/PostSubmission";
 import Analytics from "@/pages/Analytics";
 import Settings from "@/pages/Settings";
+import AIWorkbench from "@/pages/AIWorkbench";
 
 const queryClient = new QueryClient();
+
+const DAILY_ALLOWED = new Set(["/", "/monitor", "/workbench", "/ai-workbench", "/settings"]);
+
+function DailyGuard({ children, path }: { children: React.ReactNode; path: string }) {
+  const { role } = useRole();
+  if (role === "daily" && !DAILY_ALLOWED.has(path)) return <Redirect to="/" />;
+  return <>{children}</>;
+}
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Dashboard} />
-      <Route path="/intake" component={BidIntake} />
+      <Route path="/intake">{() => <DailyGuard path="/intake"><BidIntake /></DailyGuard>}</Route>
       <Route path="/monitor" component={BidMonitor} />
-      <Route path="/evaluation" component={BidEvaluation} />
-      <Route path="/evaluation/:id" component={BidEvaluation} />
+      <Route path="/evaluation">{() => <DailyGuard path="/evaluation"><BidEvaluation /></DailyGuard>}</Route>
+      <Route path="/evaluation/:id">{(params) => <DailyGuard path="/evaluation"><BidEvaluation /></DailyGuard>}</Route>
       <Route path="/workbench" component={ResponseWorkbench} />
       <Route path="/workbench/:id" component={ResponseWorkbench} />
-      <Route path="/portals" component={PortalManager} />
-      <Route path="/approvals" component={ApprovalQueue} />
-      <Route path="/executive-summary" component={ExecutiveSummary} />
-      <Route path="/executive-summary/:id" component={ExecutiveSummary} />
-      <Route path="/knowledge" component={KnowledgeBase} />
-      <Route path="/post-submission" component={PostSubmission} />
-      <Route path="/analytics" component={Analytics} />
+      <Route path="/portals">{() => <DailyGuard path="/portals"><PortalManager /></DailyGuard>}</Route>
+      <Route path="/approvals">{() => <DailyGuard path="/approvals"><ApprovalQueue /></DailyGuard>}</Route>
+      <Route path="/executive-summary">{() => <DailyGuard path="/executive-summary"><ExecutiveSummary /></DailyGuard>}</Route>
+      <Route path="/executive-summary/:id">{() => <DailyGuard path="/executive-summary"><ExecutiveSummary /></DailyGuard>}</Route>
+      <Route path="/knowledge">{() => <DailyGuard path="/knowledge"><KnowledgeBase /></DailyGuard>}</Route>
+      <Route path="/post-submission">{() => <DailyGuard path="/post-submission"><PostSubmission /></DailyGuard>}</Route>
+      <Route path="/analytics">{() => <DailyGuard path="/analytics"><Analytics /></DailyGuard>}</Route>
+      <Route path="/ai-workbench" component={AIWorkbench} />
       <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>

@@ -12,7 +12,7 @@ const RoleContext = createContext<RoleContextType | undefined>(undefined);
 export function RoleProvider({ children }: { children: ReactNode }) {
   const [role, setRoleState] = useState<Role>(() => {
     const saved = localStorage.getItem("bid-intel-role");
-    return (saved as Role) || "admin";
+    return (saved as Role) || "daily";
   });
 
   const setRole = (newRole: Role) => {

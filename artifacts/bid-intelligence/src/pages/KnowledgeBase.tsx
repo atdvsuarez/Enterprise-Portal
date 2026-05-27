@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 const categories = ["All", "Prior Bids", "Win/Loss Notes", "Pricing Guidance", "Customer Terms", "Templates"];
 
-export default function KnowledgeBase() {
+export default function KnowledgeBase({ embedded = false }: { embedded?: boolean } = {}) {
   const [category, setCategory] = useState("All");
   const [search, setSearch] = useState("");
   const [question, setQuestion] = useState("");
@@ -24,11 +24,13 @@ export default function KnowledgeBase() {
   const counts = (cat: string) => cat === "All" ? mockKnowledgeArticles.length : mockKnowledgeArticles.filter(a => a.category === cat).length;
 
   return (
-    <div className="p-4 md:p-8 max-w-[1500px] mx-auto space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Knowledge Base</h1>
-        <p className="text-muted-foreground mt-1">Search prior bids, pricing guidance, and customer terms. AI-summarized.</p>
-      </div>
+    <div className={embedded ? "space-y-6" : "p-4 md:p-8 max-w-[1500px] mx-auto space-y-6"}>
+      {!embedded && (
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Knowledge Base</h1>
+          <p className="text-muted-foreground mt-1">Search prior bids, pricing guidance, and customer terms. AI-summarized.</p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-3 space-y-2">

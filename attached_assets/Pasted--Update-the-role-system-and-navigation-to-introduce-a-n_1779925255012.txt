@@ -1,0 +1,93 @@
+
+Update the role system and navigation to introduce a new primary role:
+
+“Daily Bids Team”
+
+Do NOT remove existing roles (Admin, Scout, Account Executive),
+but prioritize the Daily Bids Team experience.
+
+-------------------------------------
+1. ADD NEW ROLE
+-------------------------------------
+
+Add a new role:
+
+- “Daily Bids Team”
+
+In the “View as” dropdown, include:
+- Daily Bids Team (NEW)
+- Admin (Daily Bids) (keep temporarily)
+- Scout
+- Account Executive
+
+Set:
+- Default selected role = “Daily Bids Team”
+
+-------------------------------------
+2. DAILY BIDS TEAM SCOPE
+-------------------------------------
+
+The Daily Bids Team role should focus ONLY on:
+
+- viewing incoming bids
+- reviewing bid details
+- generating responses
+
+-------------------------------------
+3. REMOVE SCREENS FOR DAILY BIDS TEAM
+-------------------------------------
+
+For the “Daily Bids Team” role:
+
+Remove completely from navigation:
+- Bid Evaluation
+- Post Submission
+
+Do NOT show these pages at all for this role.
+
+-------------------------------------
+4. KEEP EXISTING ROLES INTACT
+-------------------------------------
+
+For Admin, Scout, and AE:
+- do NOT remove pages globally
+- only hide them for Daily Bids Team
+
+-------------------------------------
+5. NAVIGATION SIMPLIFICATION (FOR DAILY BIDS TEAM)
+-------------------------------------
+
+For “Daily Bids Team”, navigation should be limited to:
+
+- Dashboard
+- Bid Monitor
+- Response Workbench
+- AI Workbench (merged Intake + Knowledge page)
+- Settings (optional)
+
+Remove all other navigation items for this role.
+
+-------------------------------------
+6. UX PRINCIPLE
+-------------------------------------
+
+The Daily Bids Team experience should feel:
+
+- focused
+- operational
+- streamlined
+
+Avoid exposing irrelevant workflow steps that belong to other roles.
+
+-------------------------------------
+FINAL RESULT
+-------------------------------------
+
+The “Daily Bids Team” role should feel like:
+
+“A clean, focused workspace for processing and responding to daily bids”
+
+NOT:
+
+“A full enterprise system with unnecessary steps”
+``

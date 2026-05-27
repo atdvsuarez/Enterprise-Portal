@@ -30,10 +30,11 @@ export function Topbar() {
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-muted-foreground">View as:</span>
           <Select value={role} onValueChange={(val) => setRole(val as Role)}>
-            <SelectTrigger className="w-[180px] h-9 bg-muted/30">
+            <SelectTrigger className="w-[200px] h-9 bg-muted/30">
               <SelectValue placeholder="Select role" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="daily">Daily Bids Team</SelectItem>
               <SelectItem value="admin">Admin (Daily Bids)</SelectItem>
               <SelectItem value="scout">Scout</SelectItem>
               <SelectItem value="ae">Account Executive</SelectItem>

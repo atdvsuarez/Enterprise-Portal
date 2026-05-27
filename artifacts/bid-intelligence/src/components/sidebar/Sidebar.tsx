@@ -1,6 +1,6 @@
 import { useRole } from "@/lib/role";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Inbox, Activity, CheckSquare, Wrench, BookOpen, Send, BarChart2, Settings, Globe } from "lucide-react";
+import { LayoutDashboard, Inbox, Activity, CheckSquare, Wrench, BookOpen, Send, BarChart2, Settings, Globe, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
@@ -16,6 +16,16 @@ export function Sidebar() {
       { href: "/analytics", label: "Analytics", icon: BarChart2 },
       { href: "/settings", label: "Settings", icon: Settings },
     ];
+
+    if (role === "daily") {
+      return [
+        { href: "/", label: "Dashboard", icon: LayoutDashboard },
+        { href: "/monitor", label: "Bid Monitor", icon: Activity },
+        { href: "/workbench", label: "Response Workbench", icon: Wrench },
+        { href: "/ai-workbench", label: "AI Workbench", icon: Sparkles },
+        { href: "/settings", label: "Settings", icon: Settings },
+      ];
+    }
 
     if (role === "admin") {
       return [

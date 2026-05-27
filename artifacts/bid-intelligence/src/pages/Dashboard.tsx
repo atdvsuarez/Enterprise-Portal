@@ -18,6 +18,7 @@ import { toast } from "sonner";
 
 export default function Dashboard() {
   const { role, user } = useRole();
+  if (role === "daily") return <AdminDashboard />;
   if (role === "admin") return <AdminDashboard />;
   if (role === "scout") return <ScoutDashboard />;
   return <AEDashboard userName={user.name} />;
