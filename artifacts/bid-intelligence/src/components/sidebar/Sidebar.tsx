@@ -23,7 +23,6 @@ export function Sidebar() {
         { href: "/monitor", label: "Bid Monitor", icon: Activity },
         { href: "/workbench", label: "Response Workbench", icon: Wrench },
         { href: "/ai-workbench", label: "AI Workbench", icon: Sparkles },
-        { href: "/settings", label: "Settings", icon: Settings },
       ];
     }
 

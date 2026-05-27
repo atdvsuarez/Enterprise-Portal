@@ -22,7 +22,7 @@ import AIWorkbench from "@/pages/AIWorkbench";
 
 const queryClient = new QueryClient();
 
-const DAILY_ALLOWED = new Set(["/", "/monitor", "/workbench", "/ai-workbench", "/settings"]);
+const DAILY_ALLOWED = new Set(["/", "/monitor", "/workbench", "/ai-workbench"]);
 
 function DailyGuard({ children, path }: { children: React.ReactNode; path: string }) {
   const { role } = useRole();
@@ -48,7 +48,7 @@ function Router() {
       <Route path="/post-submission">{() => <DailyGuard path="/post-submission"><PostSubmission /></DailyGuard>}</Route>
       <Route path="/analytics">{() => <DailyGuard path="/analytics"><Analytics /></DailyGuard>}</Route>
       <Route path="/ai-workbench" component={AIWorkbench} />
-      <Route path="/settings" component={Settings} />
+      <Route path="/settings">{() => <DailyGuard path="/settings"><Settings /></DailyGuard>}</Route>
       <Route component={NotFound} />
     </Switch>
   );
