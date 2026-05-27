@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { mockBids } from "@/data/mock";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, ExternalLink, FileText, DollarSign, UserPlus, Check } from "lucide-react";
+import { Search, ExternalLink, UserPlus, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -236,7 +236,7 @@ export default function BidMonitor() {
               <TableHead>Portal</TableHead>
               <TableHead className="w-[110px]">Status</TableHead>
               <TableHead className="w-[180px]">Assigned To</TableHead>
-              <TableHead className="text-right w-[280px]">Action</TableHead>
+              <TableHead className="text-right w-[120px]">Action</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -269,32 +269,14 @@ export default function BidMonitor() {
                   />
                 </TableCell>
                 <TableCell className="py-3 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 px-2 text-xs gap-1"
-                      onClick={() => setLocation(`/evaluation/${r.id}`)}
-                    >
-                      <ExternalLink className="h-3 w-3" /> Open
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 px-2 text-xs gap-1"
-                      onClick={() => toast.success(`Summary fetched for ${r.id}.`)}
-                    >
-                      <FileText className="h-3 w-3" /> Summary
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-7 px-2 text-xs gap-1"
-                      onClick={() => toast.success(`Pricing fetched for ${r.id}.`)}
-                    >
-                      <DollarSign className="h-3 w-3" /> Pricing
-                    </Button>
-                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-3 text-xs gap-1"
+                    onClick={() => setLocation(`/workbench/${r.id}`)}
+                  >
+                    <ExternalLink className="h-3 w-3" /> Open
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
