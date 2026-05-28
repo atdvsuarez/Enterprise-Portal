@@ -124,10 +124,49 @@ ${bid.customer}
 ${buyerEmail}`;
 
   const sendInOutlook = () => {
-    const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailto;
+    // Build an RFC-822 .eml so Outlook opens a draft with the CSV already attached.
+    const boundary = `----=_BidIntel_${Date.now()}`;
+    const csvBase64 = btoa(unescape(encodeURIComponent(itemsCsv)));
+    const chunked = csvBase64.match(/.{1,76}/g)?.join("\r\n") ?? csvBase64;
+    const date = new Date().toUTCString();
+    const eml = [
+      `Date: ${date}`,
+      `From: bids@cummins.com`,
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      `X-Unsent: 1`,
+      `MIME-Version: 1.0`,
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      ``,
+      `--${boundary}`,
+      `Content-Type: text/plain; charset=UTF-8`,
+      `Content-Transfer-Encoding: 7bit`,
+      ``,
+      body,
+      ``,
+      `--${boundary}`,
+      `Content-Type: text/csv; name="${attachmentName}"`,
+      `Content-Transfer-Encoding: base64`,
+      `Content-Disposition: attachment; filename="${attachmentName}"`,
+      ``,
+      chunked,
+      ``,
+      `--${boundary}--`,
+      ``,
+    ].join("\r\n");
+
+    const blob = new Blob([eml], { type: "message/rfc822" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${bid.rfqId}-response.eml`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
     toast.success("Draft opened in Outlook", {
-      description: `Attach ${attachmentName} before sending.`,
+      description: `${attachmentName} is attached to the draft.`,
     });
   };
 
