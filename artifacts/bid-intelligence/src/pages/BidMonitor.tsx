@@ -1,9 +1,9 @@
-import { useMemo, useState } from "react";
-import { useLocation } from "wouter";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useSearch } from "wouter";
 import { mockBids } from "@/data/mock";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Search, ExternalLink, UserPlus, Check } from "lucide-react";
+import { Search, ExternalLink, UserPlus, Check, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -141,11 +141,46 @@ function AssigneeSelect({
 }
 
 const FILTERS: ("All" | SimpleStatus)[] = ["All", "Pending", "Processed"];
+const SOURCE_FILTERS: { value: "All" | "Email" | "Excel" | "External URL"; label: string }[] = [
+  { value: "All", label: "All Sources" },
+  { value: "Email", label: "Email" },
+  { value: "Excel", label: "Excel" },
+  { value: "External URL", label: "URL" },
+];
 
 export default function BidMonitor() {
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
+  const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
+
   const [filter, setFilter] = useState<"All" | SimpleStatus>("All");
+  const [sourceFilter, setSourceFilter] = useState<"All" | "Email" | "Excel" | "External URL">(
+    () => {
+      const s = params.get("source");
+      return s === "Email" || s === "Excel" || s === "External URL" ? s : "All";
+    }
+  );
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const s = params.get("source");
+    setSourceFilter(s === "Email" || s === "Excel" || s === "External URL" ? s : "All");
+  }, [params]);
+
+  const updateSource = (v: "All" | "Email" | "Excel" | "External URL") => {
+    setSourceFilter(v);
+    if (v === "All") setLocation("/monitor");
+    else setLocation(`/monitor?source=${encodeURIComponent(v)}`);
+  };
+
+  const clearFilters = () => {
+    setFilter("All");
+    setSearch("");
+    setSourceFilter("All");
+    setLocation("/monitor");
+  };
+
+  const filtersActive = filter !== "All" || sourceFilter !== "All" || search.length > 0;
   const [users, setUsers] = useState<string[]>(DEFAULT_USERS);
   const [assignments, setAssignments] = useState<Record<string, string>>(() =>
     Object.fromEntries(mockBids.map((b) => [b.id, b.assignedAdmin ?? "Adrian Suarez"]))
@@ -165,13 +200,14 @@ export default function BidMonitor() {
       }))
       .filter((r) => {
         if (filter !== "All" && r.status !== filter) return false;
+        if (sourceFilter !== "All" && r.rawSource !== sourceFilter) return false;
         if (search) {
           const q = search.toLowerCase();
           if (!r.title.toLowerCase().includes(q) && !r.customer.toLowerCase().includes(q)) return false;
         }
         return true;
       });
-  }, [assignments, filter, search]);
+  }, [assignments, filter, sourceFilter, search]);
 
   const setAssignee = (id: string, name: string) => {
     setAssignments((prev) => ({ ...prev, [id]: name }));
@@ -202,8 +238,9 @@ export default function BidMonitor() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mr-1">Status</span>
           {FILTERS.map((f) => (
             <Badge
               key={f}
@@ -215,14 +252,39 @@ export default function BidMonitor() {
             </Badge>
           ))}
         </div>
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search bids…"
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground mr-1">Source</span>
+            {SOURCE_FILTERS.map((s) => (
+              <Badge
+                key={s.value}
+                variant={sourceFilter === s.value ? "default" : "outline"}
+                className="cursor-pointer hover:bg-secondary transition-colors px-3 py-1"
+                onClick={() => updateSource(s.value)}
+              >
+                {s.label}
+              </Badge>
+            ))}
+            {filtersActive && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs gap-1 ml-1"
+                onClick={clearFilters}
+              >
+                <X className="h-3 w-3" /> Clear filters
+              </Button>
+            )}
+          </div>
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search bids…"
+              className="pl-9"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
         </div>
       </div>
 
