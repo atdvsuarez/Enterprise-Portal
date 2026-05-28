@@ -1,0 +1,125 @@
+Update the “Response Workbench” page to simplify it for the Daily Bids Team workflow.
+
+Do NOT redesign the full application. Only simplify this page.
+
+-------------------------------------
+PRIMARY GOAL
+-------------------------------------
+
+This page should help a Daily Bids user:
+
+- review matched parts and pricing
+- view an AI-generated response
+- quickly move to sending the bid response
+
+The experience should be simple and fast.
+
+-------------------------------------
+1. REMOVE COMPLEX MATCHING LOGIC
+-------------------------------------
+
+Remove entirely:
+
+- “Unmatched Parts Requires Manual Mapping”
+- any unmatched parts sections
+- any manual mapping UI
+
+Assume all parts are matched.
+
+-------------------------------------
+2. REMOVE APPROVAL WORKFLOW
+-------------------------------------
+
+Remove:
+- “Mark Ready for Approval”
+
+This is not part of the Daily Bids workflow.
+
+-------------------------------------
+3. SIMPLIFY PAGE STRUCTURE
+-------------------------------------
+
+Use a clean 2-section layout:
+
+LEFT SIDE:
+- AI Drafted Response (primary focus)
+
+RIGHT SIDE:
+- Line Items Table
+
+-------------------------------------
+4. AI RESPONSE SECTION
+-------------------------------------
+
+Keep:
+- AI generated response text
+- editable text area
+
+Ensure:
+- response includes reference to line items (CSV-style structure)
+
+Add main action:
+- “View Email” button
+
+This should simulate opening the final email draft.
+
+-------------------------------------
+5. LINE ITEMS TABLE
+-------------------------------------
+
+Keep the table, but keep it simple.
+
+Columns:
+- Part Number
+- Description
+- Quantity
+- Price
+- (optional) Lead Time
+
+Remove unnecessary complexity.
+
+-------------------------------------
+6. ADD STATUS SUMMARY (NEW)
+-------------------------------------
+
+At the top of the page, show a simple status summary:
+
+Examples:
+- “All parts matched”
+- “Pricing available”
+- “Ready for response”
+
+Do NOT add complex indicators.
+
+-------------------------------------
+7. REDUCE ACTIONS
+-------------------------------------
+
+Keep actions minimal:
+
+- View Email
+
+Remove all other buttons except basic editing.
+
+-------------------------------------
+8. UX PRINCIPLES
+-------------------------------------
+
+- This page represents the final step before responding
+- Prioritize clarity over completeness
+- Remove anything that slows users down
+- Avoid showing internal system complexity
+
+-------------------------------------
+FINAL RESULT
+-------------------------------------
+
+The page should feel like:
+
+“A clean review and send screen for Daily Bids responses”
+
+NOT:
+
+“A complex processing or exception-handling interface”
+``
+-------------------------------------
