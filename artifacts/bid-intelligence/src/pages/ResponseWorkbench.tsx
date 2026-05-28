@@ -190,6 +190,7 @@ Cummins Aftermarket`,
 
   const [body, setBody] = useState(defaultBody);
   const [emailOpen, setEmailOpen] = useState(false);
+  const [draftGenerated, setDraftGenerated] = useState(false);
 
   const customerDomain = `${bid.customer.toLowerCase().replace(/[^a-z0-9]/g, "")}.gov`;
   const to = `procurement@${customerDomain}`;
@@ -289,56 +290,16 @@ ${buyerEmail}`;
         </div>
       </div>
 
-      {/* Stacked layout — response on top, full-width validation grid below */}
-      <div className="flex-1 flex flex-col gap-6 p-6 max-w-[1600px] w-full mx-auto">
-        {/* AI Drafted Response */}
-        <Card className="shadow-sm">
+      {/* Primary: matched parts table (left) · Secondary: draft response (right) */}
+      <div className="flex-1 grid grid-cols-1 xl:grid-cols-12 gap-6 p-6 max-w-[1600px] w-full mx-auto items-start">
+        {/* PRIMARY — AI-Matched Bid Parts Table */}
+        <Card className="shadow-sm xl:col-span-8">
           <CardHeader className="pb-3 border-b">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <CardTitle className="text-base flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
-                AI Drafted Response
+                AI-Matched Bid Parts Table ({items.length})
               </CardTitle>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setEmailOpen(true)}>
-                  <Inbox className="h-4 w-4" /> View Email
-                </Button>
-                <Button size="sm" className="gap-1.5" onClick={sendInOutlook}>
-                  <ExternalLink className="h-4 w-4" /> Send in Outlook
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="px-4 py-3 border-b bg-muted/20 text-sm space-y-1">
-              <div className="flex gap-3">
-                <span className="text-muted-foreground w-16 shrink-0">To</span>
-                <span className="font-medium truncate">{to}</span>
-              </div>
-              <div className="flex gap-3">
-                <span className="text-muted-foreground w-16 shrink-0">Subject</span>
-                <span className="font-medium truncate">{subject}</span>
-              </div>
-            </div>
-            <Textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              className="min-h-[260px] rounded-none border-0 font-sans text-sm leading-relaxed focus-visible:ring-0 resize-y"
-            />
-            <div className="px-4 py-3 border-t bg-muted/10">
-              <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
-                <Paperclip className="h-3 w-3" /> Attachment
-              </div>
-              <AttachmentChip onDownload={downloadCsv} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Line Items — operational validation grid */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-3 border-b">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <CardTitle className="text-base">Line Items Validation ({items.length})</CardTitle>
               <div className="flex items-center gap-3 text-xs">
                 {mismatchCount > 0 && (
                   <span className="inline-flex items-center gap-1 text-[#DA291C] font-medium">
@@ -516,6 +477,89 @@ ${buyerEmail}`;
             </div>
           </CardContent>
         </Card>
+
+        {/* SECONDARY — Draft Email Response */}
+        <div className="xl:col-span-4 xl:sticky xl:top-6">
+          {!draftGenerated ? (
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 border-b">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Draft Email Response
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-5">
+                <div className="rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-center">
+                  <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#DA291C]/10">
+                    <Sparkles className="h-5 w-5 text-[#DA291C]" />
+                  </div>
+                  <p className="text-sm font-medium">Ready when you are</p>
+                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                    Review the matched parts, pricing, inventory, and lead times first. When the bid looks
+                    right, generate a customer-ready email draft with the line items attached.
+                  </p>
+                  <Button className="mt-4 gap-1.5 w-full" onClick={() => setDraftGenerated(true)}>
+                    <Sparkles className="h-4 w-4" /> Generate Draft Email
+                  </Button>
+                </div>
+                <div className="mt-4 flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Paperclip className="h-3 w-3" /> {items.length} line items will be attached
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setEmailOpen(true)}
+                    className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                  >
+                    <Inbox className="h-3 w-3" /> View original
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="shadow-sm">
+              <CardHeader className="pb-3 border-b">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Draft Email Response
+                  </CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setEmailOpen(true)}>
+                      <Inbox className="h-4 w-4" /> View Email
+                    </Button>
+                    <Button size="sm" className="gap-1.5" onClick={sendInOutlook}>
+                      <ExternalLink className="h-4 w-4" /> Send in Outlook
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="px-4 py-3 border-b bg-muted/20 text-sm space-y-1">
+                  <div className="flex gap-3">
+                    <span className="text-muted-foreground w-16 shrink-0">To</span>
+                    <span className="font-medium truncate">{to}</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-muted-foreground w-16 shrink-0">Subject</span>
+                    <span className="font-medium truncate">{subject}</span>
+                  </div>
+                </div>
+                <Textarea
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  className="min-h-[360px] rounded-none border-0 font-sans text-sm leading-relaxed focus-visible:ring-0 resize-y"
+                />
+                <div className="px-4 py-3 border-t bg-muted/10">
+                  <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                    <Paperclip className="h-3 w-3" /> Attachment
+                  </div>
+                  <AttachmentChip onDownload={downloadCsv} />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
       {/* Original Customer Email Dialog */}

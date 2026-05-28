@@ -1,0 +1,81 @@
+III. Updates
+
+Update the Response Workbench page to make the matched parts table the primary focus and move the AI drafted response into a secondary, on-demand experience.
+
+Do NOT redesign the full application. Only adjust the layout and interaction flow of this page.
+
+-------------------------------------
+PRIMARY UX CHANGE
+-------------------------------------
+
+The user should validate matched parts first, then choose whether to generate the response.
+
+Do NOT show the AI drafted response as the dominant section by default.
+
+-------------------------------------
+1. PRIMARY SECTION
+-------------------------------------
+
+Move the line items section to the left side and make it the main focus of the page.
+
+Rename this section to:
+
+“AI-Matched Bid Parts Table”
+
+This table should be the dominant working area on the page.
+
+-------------------------------------
+2. SECONDARY AI RESPONSE PANEL
+-------------------------------------
+
+Minimize the AI drafted response by default.
+
+Do not fully expand the draft automatically when the page loads.
+
+Instead, show a collapsed or minimized panel on the right side with:
+
+- a short placeholder or preview
+- a clear button to generate the response
+
+Rename the response section to something more user-friendly such as:
+
+“Draft Email Response”
+
+-------------------------------------
+3. BUTTON / FLOW
+-------------------------------------
+
+Add a button:
+
+“Generate Draft Email”
+
+When clicked:
+- expand the AI response panel
+- generate and display the full drafted response
+- show the full editing capability
+
+This should feel like a deliberate next step after reviewing the matched parts.
+
+-------------------------------------
+4. UX PRINCIPLE
+-------------------------------------
+
+The workflow should be:
+
+- review matched parts
+- confirm pricing / inventory / lead time
+- then generate the response
+
+Do not lead with generated text before the user reviews the underlying data.
+
+-------------------------------------
+FINAL RESULT
+-------------------------------------
+
+The page should feel like:
+
+“Validate the bid first, then generate the response”
+
+NOT:
+
+“AI generated a response immediately before the user verified the details”
