@@ -11,6 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useBidStatuses, setBidStatus, type SimpleStatus as SharedStatus } from "@/lib/bidStatus";
 
 const DEFAULT_USERS = [
   "Adrian Suarez",
@@ -20,11 +21,7 @@ const DEFAULT_USERS = [
   "Sam Rivera",
 ];
 
-type SimpleStatus = "Pending" | "Submitted";
-
-function simplify(status: string): SimpleStatus {
-  return status === "Submitted" ? "Submitted" : "Pending";
-}
+type SimpleStatus = SharedStatus;
 
 function sourceLabel(s: string): string {
   if (s === "External URL") return "URL";
@@ -198,9 +195,7 @@ export default function BidMonitor() {
   const [assignments, setAssignments] = useState<Record<string, string>>(() =>
     Object.fromEntries(mockBids.map((b) => [b.id, b.assignedAdmin ?? "Adrian Suarez"]))
   );
-  const [statuses, setStatuses] = useState<Record<string, SimpleStatus>>(() =>
-    Object.fromEntries(mockBids.map((b) => [b.id, simplify(b.status)]))
-  );
+  const statuses = useBidStatuses();
 
   const rows = useMemo(() => {
     return mockBids
@@ -211,7 +206,7 @@ export default function BidMonitor() {
         source: sourceLabel(b.sourceType),
         rawSource: b.sourceType,
         portal: b.sourceType === "External URL" ? (b.portalName || "—") : "N/A",
-        status: statuses[b.id] ?? simplify(b.status),
+        status: statuses[b.id] ?? "Pending",
         assignee: assignments[b.id] ?? "",
       }))
       .filter((r) => {
@@ -231,7 +226,7 @@ export default function BidMonitor() {
   };
 
   const setStatus = (id: string, status: SimpleStatus) => {
-    setStatuses((prev) => ({ ...prev, [id]: status }));
+    setBidStatus(id, status);
     toast.success(`Marked ${status}.`);
   };
 

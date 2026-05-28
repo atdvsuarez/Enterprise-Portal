@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { mockPortals, mockBids } from "@/data/mock";
+import { useBidStatuses } from "@/lib/bidStatus";
 import { AIScorePill } from "@/components/common/AIScorePill";
 import { ConfidenceMeter } from "@/components/common/ConfidenceMeter";
 import { KpiCard } from "@/components/common/KpiCard";
@@ -291,18 +292,21 @@ function AdminDashboard() {
 
 /* ===================== DAILY BIDS TEAM — Operational Summary ===================== */
 function DailyDashboard() {
+  const statuses = useBidStatuses();
+  const isSubmitted = (id: string) => (statuses[id] ?? "Pending") === "Submitted";
+
   const bySource = (src: "Email" | "Excel" | "External URL") =>
     mockBids.filter((b) => b.sourceType === src);
 
   const bucket = (bids: typeof mockBids) => {
-    const submitted = bids.filter((b) => b.status === "Submitted").length;
+    const submitted = bids.filter((b) => isSubmitted(b.id)).length;
     const pending = bids.length - submitted;
     return { newCount: bids.length, pending, submitted };
   };
 
   const allBids = mockBids;
   const totalNew = allBids.length;
-  const totalSubmitted = allBids.filter((b) => b.status === "Submitted").length;
+  const totalSubmitted = allBids.filter((b) => isSubmitted(b.id)).length;
   const totalPending = totalNew - totalSubmitted;
 
   const intake = [
