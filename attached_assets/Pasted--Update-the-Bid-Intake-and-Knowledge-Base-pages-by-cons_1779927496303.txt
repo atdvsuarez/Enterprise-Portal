@@ -1,0 +1,133 @@
+=====
+Update the “Bid Intake” and “Knowledge Base” pages by consolidating them into a single simplified page.
+
+Do NOT keep both pages separately.
+
+-------------------------------------
+NEW PAGE NAME
+-------------------------------------
+
+Rename to:
+
+“Insights Chat”
+
+-------------------------------------
+PRIMARY GOAL
+-------------------------------------
+
+This page should help a Daily Bids user:
+
+- upload documents manually if needed
+- ask questions about a bid
+- get AI-generated answers and insights
+
+The experience should prioritize Chat, NOT browsing or searching.
+
+-------------------------------------
+1. REMOVE COMPLEX INTAKE OPTIONS
+-------------------------------------
+
+Remove:
+- Email ingestion buttons
+- External URL ingestion buttons
+
+These are handled elsewhere in the system.
+
+-------------------------------------
+2. MANUAL INGESTION (TOP SECTION)
+-------------------------------------
+
+Keep a simple section:
+
+Title:
+“Manually Ingest Documents”
+
+Include ONLY:
+- one upload button
+
+Supported formats:
+- Excel
+- PDF
+
+Do NOT add additional fields or steps.
+
+-------------------------------------
+3. REMOVE KNOWLEDGE BASE COMPLEXITY
+-------------------------------------
+
+Remove entirely:
+- categories
+- search bar
+- filtering UI
+- document classification panels
+
+-------------------------------------
+4. CHAT-FIRST EXPERIENCE (PRIMARY)
+-------------------------------------
+
+Make Chat the main feature of the page.
+
+Center of the page should be:
+
+- Chat interface
+- Input box: “Ask about this bid…”
+
+Chat responses should simulate:
+- summaries
+- extracted data
+- insights (pricing, parts, etc.)
+
+-------------------------------------
+5. ADD SUGGESTED PROMPTS
+-------------------------------------
+
+Show a small set of example queries above or inside the chat:
+
+Examples:
+- “Summarize this bid”
+- “Extract part numbers and quantities”
+- “Show pricing insights”
+- “Highlight risks”
+
+-------------------------------------
+6. OPTIONAL LIGHT CONTEXT PANEL
+-------------------------------------
+
+If needed, include a simple panel showing:
+- uploaded documents (file names only)
+- recent chat threads
+
+Keep this minimal.
+
+-------------------------------------
+7. REMOVE NAVIGATION COMPLEXITY
+-------------------------------------
+
+Do NOT reintroduce:
+- multiple tabs
+- switching between intake / knowledge base
+- anything that breaks the Chat-first flow
+
+-------------------------------------
+UX PRINCIPLES
+-------------------------------------
+
+- Chat is the primary interaction
+- Reduce steps and decision points
+- Eliminate browsing and searching
+- Keep the page simple and focused
+
+-------------------------------------
+FINAL RESULT
+-------------------------------------
+
+The page should feel like:
+
+“A simple AI assistant workspace for Daily Bids users”
+
+NOT:
+
+“A complex document management or knowledge system”
+
+
+=====
