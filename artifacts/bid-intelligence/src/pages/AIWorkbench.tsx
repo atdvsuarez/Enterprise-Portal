@@ -11,7 +11,7 @@ export default function AIWorkbench() {
           <Sparkles className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">AI Workbench</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Insights Chat</h1>
           <p className="text-muted-foreground mt-1">
             Ingest new bids and search the knowledge base — all AI-assisted, in one place.
           </p>

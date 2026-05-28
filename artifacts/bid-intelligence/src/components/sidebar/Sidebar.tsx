@@ -22,7 +22,7 @@ export function Sidebar() {
         { href: "/", label: "Dashboard", icon: LayoutDashboard },
         { href: "/monitor", label: "Bid Monitor", icon: Activity },
         { href: "/workbench", label: "Response Workbench", icon: Wrench },
-        { href: "/ai-workbench", label: "AI Workbench", icon: Sparkles },
+        { href: "/ai-workbench", label: "Insights Chat", icon: Sparkles },
       ];
     }
 
