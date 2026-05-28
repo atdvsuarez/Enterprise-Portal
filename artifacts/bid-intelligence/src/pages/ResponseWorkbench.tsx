@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Sparkles, Mail, ArrowLeft, CheckCircle2, Send } from "lucide-react";
+import { Sparkles, Mail, ArrowLeft, CheckCircle2, Send, Paperclip, FileSpreadsheet } from "lucide-react";
 import { toast } from "sonner";
 
 function StatusChip({ children }: { children: React.ReactNode }) {
@@ -46,15 +46,16 @@ export default function ResponseWorkbench() {
     return [header, ...rows].join("\n");
   }, [items]);
 
+  const attachmentName = `${bid.rfqId}-line-items.csv`;
+  const attachmentSizeKb = Math.max(1, Math.round(itemsCsv.length / 1024));
+
   const defaultBody = useMemo(
     () =>
       `Dear Procurement Team,
 
 Thank you for the opportunity to quote on ${bid.rfqId}. Cummins is pleased to submit our response for ${bid.title}.
 
-All ${items.length} requested line items have been matched to OEM components and are available with current pricing. A line-item summary is included below for your reference.
-
-${itemsCsv}
+All ${items.length} requested line items have been matched to OEM components and are available with current pricing. Please see the attached file (${attachmentName}) for the full line-item summary, including part numbers, quantities, unit pricing, and lead times.
 
 Total quoted value: $${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
@@ -63,7 +64,33 @@ Please reply to this email if you require any clarifications.
 Best regards,
 ${bid.assignedAE || "Cummins Sales Representative"}
 Cummins Aftermarket`,
-    [bid, items, itemsCsv, total]
+    [bid, items, attachmentName, total]
+  );
+
+  const downloadCsv = () => {
+    const blob = new Blob([itemsCsv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = attachmentName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const AttachmentChip = ({ onDownload }: { onDownload?: () => void }) => (
+    <button
+      type="button"
+      onClick={onDownload}
+      className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-left hover:bg-muted/50 transition-colors"
+    >
+      <FileSpreadsheet className="h-5 w-5 text-[#1f7a4a]" />
+      <span className="flex flex-col">
+        <span className="text-xs font-medium">{attachmentName}</span>
+        <span className="text-[10px] text-muted-foreground">CSV · {attachmentSizeKb} KB · {items.length} line items</span>
+      </span>
+    </button>
   );
 
   const [body, setBody] = useState(defaultBody);
@@ -130,8 +157,14 @@ Cummins Aftermarket`,
               <Textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                className="min-h-[460px] rounded-none border-0 font-mono text-xs leading-relaxed focus-visible:ring-0 resize-y"
+                className="min-h-[380px] rounded-none border-0 font-sans text-sm leading-relaxed focus-visible:ring-0 resize-y"
               />
+              <div className="px-4 py-3 border-t bg-muted/10">
+                <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                  <Paperclip className="h-3 w-3" /> Attachment
+                </div>
+                <AttachmentChip onDownload={downloadCsv} />
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -188,8 +221,14 @@ Cummins Aftermarket`,
               <div className="flex gap-3"><span className="text-muted-foreground w-16">To</span><span className="font-medium">{to}</span></div>
               <div className="flex gap-3"><span className="text-muted-foreground w-16">Subject</span><span className="font-medium">{subject}</span></div>
             </div>
-            <div className="border rounded-md bg-background p-4 max-h-[420px] overflow-auto">
-              <pre className="whitespace-pre-wrap text-xs font-mono leading-relaxed">{body}</pre>
+            <div className="border rounded-md bg-background p-4 max-h-[360px] overflow-auto">
+              <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">{body}</pre>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                <Paperclip className="h-3 w-3" /> Attachment
+              </div>
+              <AttachmentChip onDownload={downloadCsv} />
             </div>
           </div>
           <DialogFooter>
