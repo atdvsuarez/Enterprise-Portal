@@ -6,17 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Sparkles, Mail, ArrowLeft, CheckCircle2, Send, Paperclip, FileSpreadsheet, Inbox, ExternalLink } from "lucide-react";
+import { Sparkles, Mail, ArrowLeft, Send, Paperclip, FileSpreadsheet, Inbox, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-
-function StatusChip({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E8F5EE] text-[#1f7a4a] text-xs font-medium">
-      <CheckCircle2 className="h-3.5 w-3.5" />
-      {children}
-    </span>
-  );
-}
 
 export default function ResponseWorkbench() {
   const { id } = useParams();
@@ -184,16 +175,10 @@ ${buyerEmail}`;
             <div className="min-w-0">
               <h1 className="font-bold text-xl truncate">{bid.title}</h1>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mt-1">
-                <span><strong className="text-foreground">RFQ:</strong> {bid.rfqId}</span>
                 <span><strong className="text-foreground">Customer:</strong> {bid.customer}</span>
-                <span><strong className="text-foreground">Close:</strong> {new Date(bid.closeDate).toLocaleDateString()}</span>
+                <span><strong className="text-foreground">Assigned to:</strong> {bid.assignedAdmin ?? "Adrian Suarez"}</span>
               </div>
             </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusChip>All parts matched</StatusChip>
-            <StatusChip>Pricing available</StatusChip>
-            <StatusChip>Ready for response</StatusChip>
           </div>
         </div>
       </div>
