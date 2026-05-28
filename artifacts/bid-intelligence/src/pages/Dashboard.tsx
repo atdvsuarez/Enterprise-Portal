@@ -162,7 +162,7 @@ function AdminDashboard() {
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="rounded-md border border-neutral-200 bg-neutral-50 py-1.5">
                       <div className="text-sm font-bold tabular-nums text-[#1f7a4a]">{card.processed}</div>
-                      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Processed</div>
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Submitted</div>
                     </div>
                     <div className="rounded-md border border-neutral-200 bg-neutral-50 py-1.5">
                       <div className="text-sm font-bold tabular-nums text-neutral-700">{card.pending}</div>

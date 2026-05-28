@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -19,10 +20,10 @@ const DEFAULT_USERS = [
   "Sam Rivera",
 ];
 
-type SimpleStatus = "Pending" | "Processed";
+type SimpleStatus = "Pending" | "Submitted";
 
 function simplify(status: string): SimpleStatus {
-  return status === "Submitted" ? "Processed" : "Pending";
+  return status === "Submitted" ? "Submitted" : "Pending";
 }
 
 function sourceLabel(s: string): string {
@@ -31,20 +32,32 @@ function sourceLabel(s: string): string {
   return s;
 }
 
-function StatusPill({ status }: { status: SimpleStatus }) {
-  const isProcessed = status === "Processed";
+function StatusSelect({
+  value,
+  onChange,
+}: {
+  value: SimpleStatus;
+  onChange: (v: SimpleStatus) => void;
+}) {
+  const isSubmitted = value === "Submitted";
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium",
-        isProcessed
-          ? "bg-[#E8F5EE] text-[#1f7a4a]"
-          : "bg-neutral-100 text-neutral-700"
-      )}
-    >
-      <span className={cn("w-1.5 h-1.5 rounded-full", isProcessed ? "bg-[#30A566]" : "bg-neutral-400")} />
-      {status}
-    </span>
+    <Select value={value} onValueChange={(v) => onChange(v as SimpleStatus)}>
+      <SelectTrigger
+        className={cn(
+          "h-7 w-[120px] rounded-full border-0 px-2.5 text-xs font-medium gap-1.5 focus:ring-1 focus:ring-offset-0",
+          isSubmitted
+            ? "bg-[#E8F5EE] text-[#1f7a4a] hover:bg-[#dbeee3]"
+            : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+        )}
+      >
+        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isSubmitted ? "bg-[#30A566]" : "bg-neutral-400")} />
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent align="start">
+        <SelectItem value="Pending">Pending</SelectItem>
+        <SelectItem value="Submitted">Submitted</SelectItem>
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -140,7 +153,7 @@ function AssigneeSelect({
   );
 }
 
-const FILTERS: ("All" | SimpleStatus)[] = ["All", "Pending", "Processed"];
+const FILTERS: ("All" | SimpleStatus)[] = ["All", "Pending", "Submitted"];
 const SOURCE_FILTERS: { value: "All" | "Email" | "Excel" | "External URL"; label: string }[] = [
   { value: "All", label: "All Sources" },
   { value: "Email", label: "Email" },
@@ -185,6 +198,9 @@ export default function BidMonitor() {
   const [assignments, setAssignments] = useState<Record<string, string>>(() =>
     Object.fromEntries(mockBids.map((b) => [b.id, b.assignedAdmin ?? "Adrian Suarez"]))
   );
+  const [statuses, setStatuses] = useState<Record<string, SimpleStatus>>(() =>
+    Object.fromEntries(mockBids.map((b) => [b.id, simplify(b.status)]))
+  );
 
   const rows = useMemo(() => {
     return mockBids
@@ -195,7 +211,7 @@ export default function BidMonitor() {
         source: sourceLabel(b.sourceType),
         rawSource: b.sourceType,
         portal: b.sourceType === "External URL" ? (b.portalName || "—") : "N/A",
-        status: simplify(b.status),
+        status: statuses[b.id] ?? simplify(b.status),
         assignee: assignments[b.id] ?? "",
       }))
       .filter((r) => {
@@ -207,11 +223,16 @@ export default function BidMonitor() {
         }
         return true;
       });
-  }, [assignments, filter, sourceFilter, search]);
+  }, [assignments, statuses, filter, sourceFilter, search]);
 
   const setAssignee = (id: string, name: string) => {
     setAssignments((prev) => ({ ...prev, [id]: name }));
     toast.success(`Assigned to ${name}.`);
+  };
+
+  const setStatus = (id: string, status: SimpleStatus) => {
+    setStatuses((prev) => ({ ...prev, [id]: status }));
+    toast.success(`Marked ${status}.`);
   };
 
   const addUser = (name: string) => {
@@ -219,10 +240,11 @@ export default function BidMonitor() {
   };
 
   const counts = useMemo(() => {
-    const pending = mockBids.filter((b) => simplify(b.status) === "Pending").length;
-    const processed = mockBids.length - pending;
-    return { pending, processed, total: mockBids.length };
-  }, []);
+    const ids = mockBids.map((b) => b.id);
+    const pending = ids.filter((id) => (statuses[id] ?? "Pending") === "Pending").length;
+    const submitted = ids.length - pending;
+    return { pending, submitted, total: ids.length };
+  }, [statuses]);
 
   return (
     <div className="p-4 md:p-8 max-w-[1500px] mx-auto space-y-6">
@@ -234,7 +256,7 @@ export default function BidMonitor() {
         <div className="flex items-center gap-4 text-sm">
           <span className="text-muted-foreground">Total <span className="font-semibold text-foreground tabular-nums">{counts.total}</span></span>
           <span className="text-muted-foreground">Pending <span className="font-semibold text-foreground tabular-nums">{counts.pending}</span></span>
-          <span className="text-muted-foreground">Processed <span className="font-semibold text-foreground tabular-nums">{counts.processed}</span></span>
+          <span className="text-muted-foreground">Submitted <span className="font-semibold text-foreground tabular-nums">{counts.submitted}</span></span>
         </div>
       </div>
 
@@ -321,7 +343,9 @@ export default function BidMonitor() {
                     <span className="text-muted-foreground">{r.portal}</span>
                   )}
                 </TableCell>
-                <TableCell className="py-3"><StatusPill status={r.status} /></TableCell>
+                <TableCell className="py-3">
+                  <StatusSelect value={r.status} onChange={(v) => setStatus(r.id, v)} />
+                </TableCell>
                 <TableCell className="py-3">
                   <AssigneeSelect
                     value={r.assignee}
