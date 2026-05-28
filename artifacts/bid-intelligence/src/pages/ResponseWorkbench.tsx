@@ -359,8 +359,8 @@ ${buyerEmail}`;
                   <TableRow className="bg-muted/40">
                     <TableHead className="w-[150px]">Email Bid Part #</TableHead>
                     <TableHead className="w-[170px]">Cummins Found Part #</TableHead>
-                    <TableHead className="w-[110px]">Source</TableHead>
-                    <TableHead className="w-[100px]">Pack Qty</TableHead>
+                    <TableHead className="w-[110px]">Match Type</TableHead>
+                    <TableHead className="text-right w-[90px]">Pack Qty</TableHead>
                     <TableHead className="text-right w-[90px]">Qty Req.</TableHead>
                     <TableHead className="text-right w-[90px]">Price</TableHead>
                     <TableHead className="w-[150px]">Lead Time</TableHead>
@@ -422,19 +422,8 @@ ${buyerEmail}`;
                           </span>
                         </TableCell>
 
-                        {/* Pack Quantity */}
-                        <TableCell className="py-2">
-                          <Select value={r.packQty} onValueChange={(v) => updateRow(idx, { packQty: v })}>
-                            <SelectTrigger className="h-8 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {PACK_QUANTITIES.map((p) => (
-                                <SelectItem key={p} value={p} className="text-xs">{p}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
+                        {/* Pack Quantity (static) */}
+                        <TableCell className="text-right tabular-nums text-xs py-2.5">{r.packQty}</TableCell>
 
                         {/* Qty Requested */}
                         <TableCell className="text-right tabular-nums text-xs py-2.5">{r.qtyRequested}</TableCell>
