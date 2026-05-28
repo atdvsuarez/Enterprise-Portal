@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Sparkles, Upload, FileText, FileSpreadsheet, Send, User, X } from "lucide-react";
+import { Sparkles, Upload, Send, User, MessageSquare, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 type ChatMessage = {
   id: string;
@@ -11,10 +12,11 @@ type ChatMessage = {
   content: string;
 };
 
-type UploadedDoc = {
+type ChatSession = {
   id: string;
-  name: string;
-  kind: "pdf" | "excel" | "other";
+  title: string;
+  updatedAt: number;
+  messages: ChatMessage[];
 };
 
 const SUGGESTED_PROMPTS = [
@@ -35,13 +37,6 @@ const SAMPLE_RESPONSES: Record<string, string> = {
     "Risk flags:\n• Close date is 9 business days out — within standard SLA but tight for approval review\n• 1 part (CUM-MATCH-7) has expedited lead time (4+ weeks) that may not meet stated delivery\n• Customer is a new buyer this fiscal year — recommend credit check before submission\n• No compliance or restricted-party issues detected.",
 };
 
-function inferKind(name: string): UploadedDoc["kind"] {
-  const lower = name.toLowerCase();
-  if (lower.endsWith(".pdf")) return "pdf";
-  if (lower.endsWith(".xlsx") || lower.endsWith(".xls") || lower.endsWith(".csv")) return "excel";
-  return "other";
-}
-
 function generateReply(prompt: string): string {
   if (SAMPLE_RESPONSES[prompt]) return SAMPLE_RESPONSES[prompt];
   const lower = prompt.toLowerCase();
@@ -52,16 +47,54 @@ function generateReply(prompt: string): string {
   return `Here's what I found based on the active bid context:\n\nYour question — "${prompt}" — touches on details from the uploaded documents and matched catalog data. Based on the current bid, all parts are matched, pricing is available, and the response is on track for on-time submission. Ask a more specific question (parts, pricing, risks, timeline) to drill in further.`;
 }
 
+const STORAGE_KEY = "bid-intel-chat-sessions";
+
+const WELCOME_MESSAGE: ChatMessage = {
+  id: "welcome",
+  role: "assistant",
+  content:
+    "Hi — I'm your bid assistant. Upload a document or ask me anything about the active bid. Try one of the suggested prompts below to get started.",
+};
+
+function newSessionId() {
+  return `s-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function loadSessions(): ChatSession[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as ChatSession[];
+  } catch {
+    return [];
+  }
+}
+
+function saveSessions(sessions: ChatSession[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  } catch {
+    /* ignore */
+  }
+}
+
+function timeAgo(ts: number): string {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
+
 export default function AIWorkbench() {
-  const [docs, setDocs] = useState<UploadedDoc[]>([]);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content:
-        "Hi — I'm your bid assistant. Upload a document or ask me anything about the active bid. Try one of the suggested prompts below to get started.",
-    },
-  ]);
+  const [sessions, setSessions] = useState<ChatSession[]>(() => loadSessions());
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
   const [pending, setPending] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,39 +104,83 @@ export default function AIWorkbench() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, pending]);
 
+  useEffect(() => {
+    saveSessions(sessions);
+  }, [sessions]);
+
+  const sortedSessions = useMemo(
+    () => [...sessions].sort((a, b) => b.updatedAt - a.updatedAt),
+    [sessions]
+  );
+
   const handleUploadClick = () => fileInputRef.current?.click();
 
   const handleFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    const next: UploadedDoc[] = Array.from(files).map((f) => ({
-      id: `${Date.now()}-${f.name}`,
-      name: f.name,
-      kind: inferKind(f.name),
-    }));
-    setDocs((prev) => [...next, ...prev]);
-    toast.success(`${next.length} document${next.length > 1 ? "s" : ""} ingested`, {
-      description: next.map((d) => d.name).join(", "),
+    const names = Array.from(files).map((f) => f.name);
+    toast.success(`${names.length} document${names.length > 1 ? "s" : ""} ingested`, {
+      description: names.join(", "),
     });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const removeDoc = (id: string) => setDocs((prev) => prev.filter((d) => d.id !== id));
+  const startNewChat = () => {
+    setActiveId(null);
+    setMessages([WELCOME_MESSAGE]);
+    setInput("");
+  };
+
+  const loadSession = (id: string) => {
+    const s = sessions.find((x) => x.id === id);
+    if (!s) return;
+    setActiveId(id);
+    setMessages(s.messages);
+    setInput("");
+  };
+
+  const deleteSession = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+    if (activeId === id) startNewChat();
+    toast.success("Chat deleted");
+  };
 
   const sendPrompt = (raw: string) => {
     const prompt = raw.trim();
     if (!prompt || pending) return;
     const userMsg: ChatMessage = { id: `u-${Date.now()}`, role: "user", content: prompt };
-    setMessages((prev) => [...prev, userMsg]);
+    const nextMessages = [...messages, userMsg];
+    setMessages(nextMessages);
     setInput("");
     setPending(true);
+
     window.setTimeout(() => {
       const reply: ChatMessage = {
         id: `a-${Date.now()}`,
         role: "assistant",
         content: generateReply(prompt),
       };
-      setMessages((prev) => [...prev, reply]);
+      const finalMessages = [...nextMessages, reply];
+      setMessages(finalMessages);
       setPending(false);
+
+      // Persist to session
+      const title = prompt.length > 48 ? prompt.slice(0, 48) + "…" : prompt;
+      const now = Date.now();
+      if (activeId) {
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === activeId ? { ...s, messages: finalMessages, updatedAt: now } : s
+          )
+        );
+      } else {
+        const id = newSessionId();
+        setActiveId(id);
+        setSessions((prev) => [
+          { id, title, updatedAt: now, messages: finalMessages },
+          ...prev,
+        ]);
+      }
     }, 650);
   };
 
@@ -227,40 +304,77 @@ export default function AIWorkbench() {
           </div>
         </Card>
 
-        {/* Light context panel */}
-        <Card className="lg:col-span-3 shadow-sm">
-          <CardContent className="p-4 space-y-3">
+        {/* Chat History */}
+        <Card className="lg:col-span-3 shadow-sm flex flex-col h-[640px]">
+          <div className="p-3 border-b flex items-center justify-between gap-2">
             <div className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
-              Uploaded Documents
+              Chat History
             </div>
-            {docs.length === 0 ? (
-              <div className="text-xs text-muted-foreground italic">No documents uploaded yet.</div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={startNewChat}
+              className="h-7 gap-1 text-xs"
+            >
+              <Plus className="h-3.5 w-3.5" /> New
+            </Button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2">
+            {sortedSessions.length === 0 ? (
+              <div className="text-xs text-muted-foreground italic px-2 py-3 text-center">
+                No past chats yet. Send a message to start your first conversation.
+              </div>
             ) : (
-              <ul className="space-y-1.5">
-                {docs.map((d) => (
-                  <li
-                    key={d.id}
-                    className="flex items-center gap-2 text-xs bg-muted/30 rounded-md px-2 py-1.5 group"
-                  >
-                    {d.kind === "excel" ? (
-                      <FileSpreadsheet className="h-4 w-4 text-[#1f7a4a] shrink-0" />
-                    ) : (
-                      <FileText className="h-4 w-4 text-primary shrink-0" />
-                    )}
-                    <span className="truncate flex-1" title={d.name}>{d.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeDoc(d.id)}
-                      className="text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
-                      aria-label="Remove"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </li>
-                ))}
+              <ul className="space-y-1">
+                {sortedSessions.map((s) => {
+                  const isActive = s.id === activeId;
+                  const preview = s.messages.find((m) => m.role === "user")?.content ?? "";
+                  return (
+                    <li key={s.id}>
+                      <button
+                        type="button"
+                        onClick={() => loadSession(s.id)}
+                        className={cn(
+                          "group w-full text-left rounded-md px-2.5 py-2 text-xs transition-colors flex items-start gap-2",
+                          isActive
+                            ? "bg-primary/10 text-foreground"
+                            : "hover:bg-muted/70 text-foreground/90"
+                        )}
+                      >
+                        <MessageSquare
+                          className={cn(
+                            "h-3.5 w-3.5 mt-0.5 shrink-0",
+                            isActive ? "text-primary" : "text-muted-foreground"
+                          )}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium truncate" title={s.title}>
+                            {s.title}
+                          </div>
+                          <div className="flex items-center justify-between gap-2 mt-0.5">
+                            <span className="text-[10px] text-muted-foreground truncate" title={preview}>
+                              {preview || "—"}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground shrink-0">
+                              {timeAgo(s.updatedAt)}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => deleteSession(s.id, e)}
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"
+                          aria-label="Delete chat"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
-          </CardContent>
+          </div>
         </Card>
       </div>
     </div>
