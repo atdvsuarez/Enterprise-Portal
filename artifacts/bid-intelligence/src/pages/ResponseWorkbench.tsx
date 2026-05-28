@@ -55,16 +55,14 @@ export default function ResponseWorkbench() {
 
 Thank you for the opportunity to quote on ${bid.rfqId}. Cummins is pleased to submit our response for ${bid.title}.
 
-All ${items.length} requested line items have been matched to OEM components and are available with current pricing. Please see the attached file (${attachmentName}) for the full line-item summary, including part numbers, quantities, unit pricing, and lead times.
-
-Total quoted value: $${total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+Our full line-item response — including part numbers, quantities, unit pricing, and lead times — is attached as ${attachmentName}.
 
 Please reply to this email if you require any clarifications.
 
 Best regards,
 ${bid.assignedAE || "Cummins Sales Representative"}
 Cummins Aftermarket`,
-    [bid, items, attachmentName, total]
+    [bid, attachmentName]
   );
 
   const downloadCsv = () => {
