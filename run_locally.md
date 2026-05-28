@@ -128,7 +128,46 @@ The app persists the selected role in `localStorage` under `bid-intel-role`. Def
 
 ## 8. Troubleshooting
 
+### Windows: `@tailwindcss/oxide` "Cannot find native binding"
+
+Full error looks like:
+
+```
+Error: Cannot find native binding. npm has a bug related to optional dependencies …
+  at …\node_modules\.pnpm\@tailwindcss+oxide@4.x.x\node_modules\@tailwindcss\oxide\index.js
+```
+
+This is a known pnpm + Tailwind v4 issue on Windows where the platform-specific native binary (`@tailwindcss/oxide-win32-x64-msvc`) isn't linked into the isolated store. Fix in this order:
+
+1. **Make sure you're on pnpm ≥ 9.12** (older versions handle optional deps poorly on Windows):
+   ```powershell
+   pnpm -v
+   npm install -g pnpm@latest
+   ```
+
+2. **Clean reinstall** from the repo root (PowerShell):
+   ```powershell
+   Remove-Item -Recurse -Force node_modules
+   Remove-Item -Force pnpm-lock.yaml
+   pnpm install
+   ```
+   (Or in Git Bash: `rm -rf node_modules pnpm-lock.yaml && pnpm install`.)
+
+3. **If it still fails**, force pnpm to hoist native binaries. Create a file named `.npmrc` in the repo root with:
+   ```
+   node-linker=hoisted
+   public-hoist-pattern[]=*@tailwindcss/oxide*
+   ```
+   Then re-run the clean reinstall in step 2. Do **not** commit the `.npmrc` — it's a local workaround.
+
+4. **Last resort** — install the Windows binary explicitly in the artifact:
+   ```powershell
+   pnpm --filter @workspace/bid-intelligence add -D @tailwindcss/oxide-win32-x64-msvc
+   ```
+
+### Other issues
+
 - **"Use pnpm instead"** — you ran `npm install` or `yarn install`. Use `pnpm install`.
-- **Port already in use** — set `PORT=<free port>` before the dev command.
+- **Port already in use** — set `PORT=<free port>` before the dev command (PowerShell: `$env:PORT=3000; pnpm --filter @workspace/bid-intelligence run dev`).
 - **Module not found `@workspace/api-client-react`** — you only cloned the `artifacts/bid-intelligence` folder. Clone the full monorepo and run `pnpm install` from the root.
 - **Type errors only in the editor** — restart the TS server in your IDE. Trust `pnpm run typecheck` over the editor.
