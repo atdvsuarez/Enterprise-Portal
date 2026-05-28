@@ -342,12 +342,12 @@ function DailyDashboard() {
         <Button
           className="gap-2"
           onClick={() =>
-            toast.success("Intake re-run started", {
-              description: "Refetching from Email, Excel, and External URL sources.",
+            toast.success("Sync started", {
+              description: "Checking Email, Excel, and External URL sources for new bids.",
             })
           }
         >
-          <RefreshCw className="h-4 w-4" /> Re-Run Intake
+          <RefreshCw className="h-4 w-4" /> Sync New Bids
         </Button>
       </div>
 
