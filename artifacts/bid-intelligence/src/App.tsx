@@ -23,7 +23,7 @@ import Home from "@/pages/Home";
 
 const queryClient = new QueryClient();
 
-const DAILY_ALLOWED = new Set(["/", "/dashboard", "/monitor", "/workbench", "/ai-workbench"]);
+const DAILY_ALLOWED = new Set(["/", "/dashboard", "/monitor", "/workbench", "/ai-workbench", "/analytics"]);
 
 function DailyGuard({ children, path }: { children: React.ReactNode; path: string }) {
   const { role } = useRole();

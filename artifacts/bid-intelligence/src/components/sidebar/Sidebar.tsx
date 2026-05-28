@@ -17,6 +17,7 @@ export function Sidebar() {
         { href: "/monitor", label: "Bid Monitor", icon: Activity },
         { href: "/workbench", label: "Response Workbench", icon: Wrench },
         { href: "/ai-workbench", label: "Insights Chat", icon: Sparkles },
+        { href: "/analytics", label: "Analytics", icon: BarChart2 },
       ];
     }
 
