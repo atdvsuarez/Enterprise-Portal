@@ -3,14 +3,16 @@ import { useParams, Link } from "wouter";
 import { getBidById, mockBids } from "@/data/mock";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   ArrowLeft, CheckCircle2, XCircle, Link2, FileText, Sparkles, UploadCloud,
-  Loader2, AlertTriangle, Download, Package, Hash, FileCheck2,
+  Loader2, AlertTriangle, Download, FileCheck2, Paperclip, ExternalLink, FileSpreadsheet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { MatchedPartsTable } from "@/components/common/MatchedPartsTable";
-import { buildWorkbenchRows, type WorkbenchRow } from "@/lib/workbenchRows";
+import { buildWorkbenchRows, resolvedLead, type WorkbenchRow } from "@/lib/workbenchRows";
 import type { Bid } from "@/data/types";
 
 type Scenario = "happy" | "manual";
@@ -43,12 +45,8 @@ function StatusRow({ ok, label, okText, failText }: { ok: boolean; label: string
   );
 }
 
-/* ---- AI summary of the extracted bid ---- */
+/* ---- AI summary: bid name + extracted parts/quantities as a table ---- */
 function AiSummary({ bid }: { bid: Bid }) {
-  const partIds = bid.lineItems.slice(0, 4).map((li) => li.partNumber);
-  const extraParts = bid.lineItems.length - partIds.length;
-  const quantities = bid.lineItems.slice(0, 4).map((li) => li.quantity);
-
   return (
     <Card className="shadow-sm">
       <CardHeader className="pb-3 border-b">
@@ -56,7 +54,7 @@ function AiSummary({ bid }: { bid: Bid }) {
           <Sparkles className="h-4 w-4 text-primary" /> AI Summary
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-5 grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <CardContent className="p-5 space-y-5">
         <div className="space-y-1">
           <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
             <FileText className="h-3.5 w-3.5" /> Bid Name
@@ -65,31 +63,31 @@ function AiSummary({ bid }: { bid: Bid }) {
           <p className="text-xs text-muted-foreground">{bid.rfqId} · {bid.customer}</p>
         </div>
 
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
-            <Hash className="h-3.5 w-3.5" /> Part ID(s)
+        <div className="space-y-2">
+          <div className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+            Extracted Part IDs &amp; Quantities ({bid.lineItems.length})
           </div>
-          <div className="flex flex-wrap gap-1">
-            {partIds.map((p) => (
-              <span key={p} className="font-mono text-[11px] rounded bg-muted px-1.5 py-0.5">{p}</span>
-            ))}
-            {extraParts > 0 && (
-              <span className="text-[11px] text-muted-foreground px-1 py-0.5">+{extraParts} more</span>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
-            <Package className="h-3.5 w-3.5" /> Quantity(ies)
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {quantities.map((q, i) => (
-              <span key={i} className="tabular-nums text-[11px] rounded bg-muted px-1.5 py-0.5">{q}</span>
-            ))}
-            {extraParts > 0 && (
-              <span className="text-[11px] text-muted-foreground px-1 py-0.5">+{extraParts} more</span>
-            )}
+          <div className="rounded-md border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/40">
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Part ID</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead className="text-right w-24">Quantity</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bid.lineItems.map((li, i) => (
+                  <TableRow key={i}>
+                    <TableCell className="text-muted-foreground tabular-nums">{li.lineNumber}</TableCell>
+                    <TableCell className="font-mono text-xs">{li.partNumber}</TableCell>
+                    <TableCell className="text-muted-foreground">{li.description}</TableCell>
+                    <TableCell className="text-right tabular-nums">{li.quantity}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </div>
       </CardContent>
@@ -98,7 +96,7 @@ function AiSummary({ bid }: { bid: Bid }) {
 }
 
 /* ---- Inline PDF preview (rendered mock of the retrieved bid document) ---- */
-function PdfPreview({ bid }: { bid: Bid }) {
+function PdfPreview({ bid, retrievedLabel }: { bid: Bid; retrievedLabel: string }) {
   const fileName = `${bid.rfqId}-bid-document.pdf`;
   return (
     <Card className="shadow-sm">
@@ -160,8 +158,196 @@ function PdfPreview({ bid }: { bid: Bid }) {
 
           <div className="mt-6 pt-4 border-t border-neutral-300 text-[11px] text-neutral-500">
             <p>Terms: Pricing firm 30 days. FOB destination. Reference {bid.rfqId} on all correspondence.</p>
-            <p className="mt-3 text-neutral-400">Page 1 of 1 · Retrieved automatically from {bid.portalName}</p>
+            <p className="mt-3 text-neutral-400">Page 1 of 1 · {retrievedLabel}</p>
           </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ---- Draft Email Response (mirrors Response Workbench) ---- */
+function DraftEmailResponse({ bid, rows }: { bid: Bid; rows: WorkbenchRow[] }) {
+  const itemsCsv = useMemo(() => {
+    const header =
+      "Email Bid Part,Cummins Found Part,Source,Pack Qty,Qty Requested,Unit Price,Lead Time,Inventory Status";
+    const csvRows = rows.map((r) =>
+      [
+        r.emailBidPart,
+        r.cumminsFoundPart,
+        r.source,
+        r.packQty,
+        r.qtyRequested,
+        `$${r.price.toFixed(2)}`,
+        resolvedLead(r),
+        r.inventoryStatus,
+      ].join(",")
+    );
+    return [header, ...csvRows].join("\n");
+  }, [rows]);
+
+  const attachmentName = `${bid.rfqId}-line-items.csv`;
+  const attachmentSizeKb = Math.max(1, Math.round(itemsCsv.length / 1024));
+
+  const customerDomain = `${bid.customer.toLowerCase().replace(/[^a-z0-9]/g, "")}.gov`;
+  const to = `procurement@${customerDomain}`;
+  const subject = `Response to ${bid.rfqId} — ${bid.title}`;
+
+  const defaultBody = useMemo(
+    () =>
+      `Dear Procurement Team,
+
+Thank you for the opportunity to quote on ${bid.rfqId} via ${bid.portalName}. Cummins is pleased to submit our response for ${bid.title}.
+
+Our full line-item response — including part numbers, quantities, unit pricing, and lead times — is attached as ${attachmentName}.
+
+Please reply to this email if you require any clarifications.
+
+Best regards,
+${bid.assignedAE || "Cummins Sales Representative"}
+Cummins Aftermarket`,
+    [bid, attachmentName]
+  );
+
+  const [body, setBody] = useState(defaultBody);
+  const [draftGenerated, setDraftGenerated] = useState(false);
+  useEffect(() => setBody(defaultBody), [defaultBody]);
+
+  const downloadCsv = () => {
+    const blob = new Blob([itemsCsv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = attachmentName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const sendInOutlook = () => {
+    const boundary = `----=_BidIntel_${Date.now()}`;
+    const csvBase64 = btoa(unescape(encodeURIComponent(itemsCsv)));
+    const chunked = csvBase64.match(/.{1,76}/g)?.join("\r\n") ?? csvBase64;
+    const date = new Date().toUTCString();
+    const eml = [
+      `Date: ${date}`,
+      `From: bids@cummins.com`,
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      `X-Unsent: 1`,
+      `MIME-Version: 1.0`,
+      `Content-Type: multipart/mixed; boundary="${boundary}"`,
+      ``,
+      `--${boundary}`,
+      `Content-Type: text/plain; charset=UTF-8`,
+      `Content-Transfer-Encoding: 7bit`,
+      ``,
+      body,
+      ``,
+      `--${boundary}`,
+      `Content-Type: text/csv; name="${attachmentName}"`,
+      `Content-Transfer-Encoding: base64`,
+      `Content-Disposition: attachment; filename="${attachmentName}"`,
+      ``,
+      chunked,
+      ``,
+      `--${boundary}--`,
+      ``,
+    ].join("\r\n");
+
+    const blob = new Blob([eml], { type: "message/rfc822" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${bid.rfqId}-response.eml`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+    toast.success("Draft opened in Outlook", {
+      description: `${attachmentName} is attached to the draft.`,
+    });
+  };
+
+  const AttachmentChip = () => (
+    <button
+      type="button"
+      onClick={downloadCsv}
+      className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2 text-left hover:bg-muted/50 transition-colors"
+    >
+      <FileSpreadsheet className="h-5 w-5 text-[#1f7a4a]" />
+      <span className="flex flex-col">
+        <span className="text-xs font-medium">{attachmentName}</span>
+        <span className="text-[10px] text-muted-foreground">CSV · {attachmentSizeKb} KB · {rows.length} line items</span>
+      </span>
+    </button>
+  );
+
+  if (!draftGenerated) {
+    return (
+      <Card className="shadow-sm">
+        <CardHeader className="pb-3 border-b">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" /> Draft Email Response
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-5">
+          <div className="rounded-lg border border-dashed bg-muted/20 px-4 py-6 text-center max-w-xl mx-auto">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[#DA291C]/10">
+              <Sparkles className="h-5 w-5 text-[#DA291C]" />
+            </div>
+            <p className="text-sm font-medium">Ready when you are</p>
+            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+              Review the matched parts, pricing, inventory, and lead times above. When the bid looks
+              right, generate a customer-ready email draft with the line items attached.
+            </p>
+            <Button className="mt-4 gap-1.5" onClick={() => setDraftGenerated(true)}>
+              <Sparkles className="h-4 w-4" /> Generate Draft Email
+            </Button>
+            <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
+              <Paperclip className="h-3 w-3" /> {rows.length} line items will be attached
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="shadow-sm">
+      <CardHeader className="pb-3 border-b">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" /> Draft Email Response
+          </CardTitle>
+          <Button size="sm" className="gap-1.5" onClick={sendInOutlook}>
+            <ExternalLink className="h-4 w-4" /> Send in Outlook
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="px-4 py-3 border-b bg-muted/20 text-sm space-y-1">
+          <div className="flex gap-3">
+            <span className="text-muted-foreground w-16 shrink-0">To</span>
+            <span className="font-medium truncate">{to}</span>
+          </div>
+          <div className="flex gap-3">
+            <span className="text-muted-foreground w-16 shrink-0">Subject</span>
+            <span className="font-medium truncate">{subject}</span>
+          </div>
+        </div>
+        <Textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          className="min-h-[280px] rounded-none border-0 font-sans text-sm leading-relaxed focus-visible:ring-0 resize-y"
+        />
+        <div className="px-4 py-3 border-t bg-muted/10">
+          <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+            <Paperclip className="h-3 w-3" /> Attachment
+          </div>
+          <AttachmentChip />
         </div>
       </CardContent>
     </Card>
@@ -207,7 +393,6 @@ export default function PortalBidReview() {
     setUploadedName(file.name);
     setProcessing(true);
     setProcessed(false);
-    // Simulate the same extraction pipeline as the automatic path
     setTimeout(() => {
       setProcessing(false);
       setProcessed(true);
@@ -215,28 +400,35 @@ export default function PortalBidReview() {
     }, 1800);
   };
 
-  // The processed output (AI summary + matched table) shared by both scenarios
-  const ProcessedOutput = (
+  const MatchedTableCard = (
+    <Card className="shadow-sm">
+      <CardHeader className="pb-3 border-b">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary" /> AI-Matched Bid Parts Table ({rows.length})
+          </CardTitle>
+          {mismatchCount > 0 && (
+            <span className="inline-flex items-center gap-1 text-[#DA291C] font-medium text-xs">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              {mismatchCount} part {mismatchCount === 1 ? "mismatch" : "mismatches"} to review
+            </span>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <MatchedPartsTable rows={rows} onUpdate={updateRow} />
+      </CardContent>
+    </Card>
+  );
+
+  // Processed output, shared by both scenarios:
+  // PDF preview first → AI summary → matched table → draft email last.
+  const ProcessedOutput = (retrievedLabel: string) => (
     <>
+      <PdfPreview bid={bid} retrievedLabel={retrievedLabel} />
       <AiSummary bid={bid} />
-      <Card className="shadow-sm">
-        <CardHeader className="pb-3 border-b">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-primary" /> AI-Matched Bid Parts Table ({rows.length})
-            </CardTitle>
-            {mismatchCount > 0 && (
-              <span className="inline-flex items-center gap-1 text-[#DA291C] font-medium text-xs">
-                <AlertTriangle className="h-3.5 w-3.5" />
-                {mismatchCount} part {mismatchCount === 1 ? "mismatch" : "mismatches"} to review
-              </span>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          <MatchedPartsTable rows={rows} onUpdate={updateRow} />
-        </CardContent>
-      </Card>
+      {MatchedTableCard}
+      <DraftEmailResponse bid={bid} rows={rows} />
     </>
   );
 
@@ -306,28 +498,7 @@ export default function PortalBidReview() {
         </Card>
 
         {scenario === "happy" ? (
-          <>
-            <AiSummary bid={bid} />
-            <PdfPreview bid={bid} />
-            <Card className="shadow-sm">
-              <CardHeader className="pb-3 border-b">
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" /> AI-Matched Bid Parts Table ({rows.length})
-                  </CardTitle>
-                  {mismatchCount > 0 && (
-                    <span className="inline-flex items-center gap-1 text-[#DA291C] font-medium text-xs">
-                      <AlertTriangle className="h-3.5 w-3.5" />
-                      {mismatchCount} part {mismatchCount === 1 ? "mismatch" : "mismatches"} to review
-                    </span>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <MatchedPartsTable rows={rows} onUpdate={updateRow} />
-              </CardContent>
-            </Card>
-          </>
+          ProcessedOutput(`Retrieved automatically from ${bid.portalName}`)
         ) : (
           <>
             {/* Manual path notification */}
@@ -392,7 +563,7 @@ export default function PortalBidReview() {
                   <FileCheck2 className="h-4 w-4 shrink-0" />
                   <span><span className="font-medium">{uploadedName}</span> uploaded and processed successfully.</span>
                 </div>
-                {ProcessedOutput}
+                {ProcessedOutput(`Uploaded manually${uploadedName ? ` · ${uploadedName}` : ""}`)}
               </>
             )}
           </>

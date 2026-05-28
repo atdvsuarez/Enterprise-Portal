@@ -354,7 +354,13 @@ export default function BidMonitor() {
                     size="sm"
                     variant="outline"
                     className="h-7 px-3 text-xs gap-1"
-                    onClick={() => setLocation(`/workbench/${r.id}`)}
+                    onClick={() =>
+                      setLocation(
+                        r.rawSource === "Portal Intake" || r.rawSource === "Portal"
+                          ? `/portal-review/${r.id}`
+                          : `/workbench/${r.id}`
+                      )
+                    }
                   >
                     <ExternalLink className="h-3 w-3" /> Open
                   </Button>
