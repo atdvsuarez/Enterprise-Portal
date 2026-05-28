@@ -56,15 +56,15 @@ function AdminDashboard() {
     },
     {
       key: "url",
-      title: "External URL Intake",
-      icon: Link2,
+      title: "Portal Intake",
+      icon: Globe,
       accent: "#787877", // Gray — neutral channel
       newCount: 4,
       processed: 3,
       pending: 0,
       failed: 1,
       latest: "27 min ago",
-      sourceFilter: "External URL" as const,
+      sourceFilter: "Portal Intake" as const,
     },
   ];
 
@@ -295,7 +295,7 @@ function DailyDashboard() {
   const statuses = useBidStatuses();
   const isSubmitted = (id: string) => (statuses[id] ?? "Pending") === "Submitted";
 
-  const bySource = (src: "Email" | "Excel" | "External URL") =>
+  const bySource = (src: "Email" | "Excel" | "Portal Intake") =>
     mockBids.filter((b) => b.sourceType === src);
 
   const bucket = (bids: typeof mockBids) => {
@@ -328,11 +328,11 @@ function DailyDashboard() {
     },
     {
       key: "url",
-      title: "External URL Intake",
-      icon: Link2,
+      title: "Portal Intake",
+      icon: Globe,
       accent: "#787877",
-      source: "External URL" as const,
-      ...bucket(bySource("External URL")),
+      source: "Portal Intake" as const,
+      ...bucket(bySource("Portal Intake")),
     },
   ];
 
@@ -347,7 +347,7 @@ function DailyDashboard() {
           className="gap-2"
           onClick={() =>
             toast.success("Sync started", {
-              description: "Checking Email, Excel, and External URL sources for new bids.",
+              description: "Checking Email, Excel, and Portal Intake sources for new bids.",
             })
           }
         >

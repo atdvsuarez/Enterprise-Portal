@@ -30,7 +30,7 @@ const generateBids = (): Bid[] => {
     "VIA San Antonio", "TriMet Portland", "City of Austin Fleet Services", "LA Metro"
   ];
   
-  const sources: ("Email" | "Excel" | "External URL" | "Portal")[] = ["Email", "Excel", "External URL", "Portal"];
+  const sources: ("Email" | "Excel" | "Portal Intake" | "Portal")[] = ["Email", "Excel", "Portal Intake", "Portal"];
   const statuses: Bid["status"][] = ["New", "Needs Review", "Ready for Response", "Pending Approval", "Submitted", "Restricted", "Exception"];
   const stages: Bid["pipelineStage"][] = ["Identify", "Qualify", "Respond", "Post-Submission"];
   const recs: Bid["goNoGoRecommendation"][] = ["Go", "No-Go", "Review"];
@@ -146,7 +146,7 @@ export const mockAnalyticsData = {
   sourceType: [
     { name: 'Portal', value: 450 },
     { name: 'Email', value: 320 },
-    { name: 'External URL', value: 210 },
+    { name: 'Portal Intake', value: 210 },
     { name: 'Excel', value: 150 },
   ],
   trends: [

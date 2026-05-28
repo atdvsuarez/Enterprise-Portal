@@ -107,7 +107,7 @@ export default function BidIntake({ embedded = false }: { embedded?: boolean } =
             <TabsContent value="url" className="mt-0">
               <Card className="shadow-sm">
                 <CardHeader>
-                  <CardTitle>External URL Scan</CardTitle>
+                  <CardTitle>Portal Intake</CardTitle>
                   <CardDescription>Auto-pull details from supported portals.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">

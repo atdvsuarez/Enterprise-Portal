@@ -14,7 +14,7 @@ export const USERS: Record<Role, User> = {
 };
 
 export type BidStatus = "New" | "Needs Review" | "Ready for Response" | "Pending Approval" | "Submitted" | "Restricted" | "Exception";
-export type SourceType = "Email" | "Excel" | "External URL" | "Portal";
+export type SourceType = "Email" | "Excel" | "Portal Intake" | "Portal";
 export type PipelineStage = "Identify" | "Qualify" | "Respond" | "Post-Submission";
 export type Recommendation = "Go" | "No-Go" | "Review";
 

@@ -11,6 +11,7 @@ import BidIntake from "@/pages/BidIntake";
 import BidMonitor from "@/pages/BidMonitor";
 import BidEvaluation from "@/pages/BidEvaluation";
 import ResponseWorkbench from "@/pages/ResponseWorkbench";
+import PortalBidReview from "@/pages/PortalBidReview";
 import PortalManager from "@/pages/PortalManager";
 import ApprovalQueue from "@/pages/ApprovalQueue";
 import ExecutiveSummary from "@/pages/ExecutiveSummary";
@@ -23,7 +24,7 @@ import Home from "@/pages/Home";
 
 const queryClient = new QueryClient();
 
-const DAILY_ALLOWED = new Set(["/", "/dashboard", "/monitor", "/workbench", "/ai-workbench", "/analytics"]);
+const DAILY_ALLOWED = new Set(["/", "/dashboard", "/monitor", "/workbench", "/portal-review", "/ai-workbench", "/analytics"]);
 
 function DailyGuard({ children, path }: { children: React.ReactNode; path: string }) {
   const { role } = useRole();
@@ -42,6 +43,8 @@ function Router() {
       <Route path="/evaluation/:id">{(params) => <DailyGuard path="/evaluation"><BidEvaluation /></DailyGuard>}</Route>
       <Route path="/workbench" component={ResponseWorkbench} />
       <Route path="/workbench/:id" component={ResponseWorkbench} />
+      <Route path="/portal-review">{() => <DailyGuard path="/portal-review"><PortalBidReview /></DailyGuard>}</Route>
+      <Route path="/portal-review/:id">{() => <DailyGuard path="/portal-review"><PortalBidReview /></DailyGuard>}</Route>
       <Route path="/portals">{() => <DailyGuard path="/portals"><PortalManager /></DailyGuard>}</Route>
       <Route path="/approvals">{() => <DailyGuard path="/approvals"><ApprovalQueue /></DailyGuard>}</Route>
       <Route path="/executive-summary">{() => <DailyGuard path="/executive-summary"><ExecutiveSummary /></DailyGuard>}</Route>

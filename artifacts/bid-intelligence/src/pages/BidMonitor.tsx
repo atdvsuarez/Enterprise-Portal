@@ -24,8 +24,8 @@ const DEFAULT_USERS = [
 type SimpleStatus = SharedStatus;
 
 function sourceLabel(s: string): string {
-  if (s === "External URL") return "URL";
-  if (s === "Portal") return "URL";
+  // "Portal Intake" (daily URL channel) and "Portal" (scout-discovered) are
+  // distinct sources — keep their labels distinct rather than collapsing them.
   return s;
 }
 
@@ -151,11 +151,11 @@ function AssigneeSelect({
 }
 
 const FILTERS: ("All" | SimpleStatus)[] = ["All", "Pending", "Submitted"];
-const SOURCE_FILTERS: { value: "All" | "Email" | "Excel" | "External URL"; label: string }[] = [
+const SOURCE_FILTERS: { value: "All" | "Email" | "Excel" | "Portal Intake"; label: string }[] = [
   { value: "All", label: "All Sources" },
   { value: "Email", label: "Email" },
   { value: "Excel", label: "Excel" },
-  { value: "External URL", label: "URL" },
+  { value: "Portal Intake", label: "Portal Intake" },
 ];
 
 export default function BidMonitor() {
@@ -164,20 +164,20 @@ export default function BidMonitor() {
   const params = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   const [filter, setFilter] = useState<"All" | SimpleStatus>("All");
-  const [sourceFilter, setSourceFilter] = useState<"All" | "Email" | "Excel" | "External URL">(
+  const [sourceFilter, setSourceFilter] = useState<"All" | "Email" | "Excel" | "Portal Intake">(
     () => {
       const s = params.get("source");
-      return s === "Email" || s === "Excel" || s === "External URL" ? s : "All";
+      return s === "Email" || s === "Excel" || s === "Portal Intake" ? s : "All";
     }
   );
   const [search, setSearch] = useState("");
 
   useEffect(() => {
     const s = params.get("source");
-    setSourceFilter(s === "Email" || s === "Excel" || s === "External URL" ? s : "All");
+    setSourceFilter(s === "Email" || s === "Excel" || s === "Portal Intake" ? s : "All");
   }, [params]);
 
-  const updateSource = (v: "All" | "Email" | "Excel" | "External URL") => {
+  const updateSource = (v: "All" | "Email" | "Excel" | "Portal Intake") => {
     setSourceFilter(v);
     if (v === "All") setLocation("/monitor");
     else setLocation(`/monitor?source=${encodeURIComponent(v)}`);
@@ -205,7 +205,7 @@ export default function BidMonitor() {
         customer: b.customer,
         source: sourceLabel(b.sourceType),
         rawSource: b.sourceType,
-        portal: b.sourceType === "External URL" ? (b.portalName || "—") : "N/A",
+        portal: b.sourceType === "Portal Intake" ? (b.portalName || "—") : "N/A",
         status: statuses[b.id] ?? "Pending",
         assignee: assignments[b.id] ?? "",
       }))

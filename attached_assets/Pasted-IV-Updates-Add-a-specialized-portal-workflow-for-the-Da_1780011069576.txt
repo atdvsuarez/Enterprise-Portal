@@ -1,0 +1,149 @@
+IV Updates
+Add a specialized portal workflow for the “Daily Bids Team” role.
+
+Do NOT route this workflow into the broader Insights Chat / Q&A experience.
+This should be a focused operational flow for handling bids that originate from portal URLs.
+
+-------------------------------------
+NEW PAGE / FLOW
+-------------------------------------
+
+Create a new screen or view called:
+
+“Portal Bid Review”
+
+Use this naming consistently.
+
+Also update naming across the rest of the application for uniformity:
+- Replace “External URL Intake” with “Portal Intake”
+- Replace “External URL” in labels, cards, filters, and tables with “Portal” or “Portal Intake” where appropriate
+
+Examples:
+- Dashboard card: “Portal Intake”
+- Source values: “Portal”
+- Intake labels: “Portal Intake”
+- Review page: “Portal Bid Review”
+
+-------------------------------------
+PRIMARY GOAL
+-------------------------------------
+
+Help the Daily Bids user process bids that originate from portal URLs by:
+
+- showing whether the portal URL was successfully processed
+- showing the extracted bid information if available
+- providing a fallback manual PDF upload path if the PDF could not be retrieved automatically
+
+-------------------------------------
+SCENARIO 1: HAPPY PATH
+-------------------------------------
+
+If the AI can successfully process the portal URL and download the bid PDF:
+
+Show these sections:
+
+1. STATUS HEADER
+- Portal URL identified
+- PDF retrieved successfully
+
+2. AI SUMMARY
+Display:
+- Bid Name
+- Part ID(s)
+- Quantity(ies)
+
+Keep this concise and easy to scan.
+
+3. PDF PREVIEW
+Show the downloaded PDF directly on the page so the user can visually validate the bid.
+
+4. AI-MATCHED BID PARTS TABLE
+Below the PDF preview, show the table of matched parts.
+
+Use the same operational table pattern already used in the Response Workbench.
+
+-------------------------------------
+SCENARIO 2: BLOCKED / MANUAL PATH
+-------------------------------------
+
+If the AI identifies the portal URL but cannot retrieve the PDF automatically:
+
+Show a clear notification:
+
+“Portal URL identified, but the bid PDF could not be retrieved automatically. Please download the PDF from the portal and upload it below to continue processing.”
+
+Then show:
+
+1. STATUS HEADER
+- Portal URL identified
+- PDF retrieval unsuccessful
+
+2. MANUAL PDF UPLOAD
+Include a single upload button for PDF only.
+
+3. AFTER UPLOAD
+Once a PDF is uploaded, simulate the same processing flow:
+- AI summary of the bid
+- extracted Bid Name
+- extracted Part ID(s)
+- extracted Quantity(ies)
+- AI-Matched Bid Parts Table
+
+-------------------------------------
+DASHBOARD INTEGRATION
+-------------------------------------
+
+Ensure portal-originated bids are counted in the Dashboard under:
+- Portal Intake
+
+Include both:
+- successfully processed portal bids
+- portal bids requiring manual PDF upload
+
+-------------------------------------
+UX RULES
+-------------------------------------
+
+- Keep this as a focused operational page
+- Do NOT expose the broader Insights Chat / Q&A interface here
+- Do NOT make the user browse categories or search knowledge content
+- The flow should be linear and easy to understand
+
+-------------------------------------
+VISUAL STRUCTURE
+-------------------------------------
+
+The page should clearly separate:
+- system status
+- AI summary
+- document preview or upload
+- matched table
+
+Use a clean, minimal layout.
+
+-------------------------------------
+NAMING CONSISTENCY
+-------------------------------------
+
+Across the application, use these names consistently:
+
+- Portal Intake
+- Portal
+- Portal Bid Review
+
+Avoid mixing with:
+- External URL
+- URL Intake
+- External Bid
+
+-------------------------------------
+FINAL RESULT
+-------------------------------------
+
+The experience should feel like:
+
+“A focused portal bid review workflow with a clear fallback path”
+
+NOT:
+
+“A generic document chat or knowledge interface”

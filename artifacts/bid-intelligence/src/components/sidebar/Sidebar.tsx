@@ -15,6 +15,7 @@ export function Sidebar() {
         home,
         { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/monitor", label: "Bid Monitor", icon: Activity },
+        { href: "/portal-review", label: "Portal Bid Review", icon: Globe },
         { href: "/workbench", label: "Response Workbench", icon: Wrench },
         { href: "/ai-workbench", label: "Insights Chat", icon: Sparkles },
         { href: "/analytics", label: "Daily Bids Analytics", icon: BarChart2 },
