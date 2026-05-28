@@ -1,0 +1,140 @@
+II. Updates
+
+Update the “Response Workbench” page to enhance the Line Items Table to reflect realistic Daily Bids processing logic.
+
+Do NOT redesign the entire page. Focus on improving the table and related logic.
+
+-------------------------------------
+PRIMARY GOAL
+-------------------------------------
+
+The table should help a Daily Bids user:
+
+- validate part matching
+- review inventory availability
+- set lead times
+- confirm readiness for response
+
+The table must feel operational and realistic.
+
+-------------------------------------
+1. UPDATE TABLE COLUMNS
+-------------------------------------
+
+Replace existing columns with the following:
+
+- Email Bid Part #
+- Cummins Found Part #
+- Source
+- Pack Quantity
+- Qty Requested
+- Price
+- Lead Time
+- Inventory Details
+- Inventory Status
+
+-------------------------------------
+2. PART MATCH VALIDATION
+-------------------------------------
+
+If:
+- Email Bid Part # does NOT match Cummins Found Part #
+
+Then:
+- highlight the row with a subtle red indicator
+- show a warning icon or text
+- keep visual clean (do NOT make overly loud)
+
+-------------------------------------
+3. LEAD TIME COLUMN (USER INPUT)
+-------------------------------------
+
+Make Lead Time selectable per row.
+
+Options:
+- 4 days
+- 2 weeks
+- 3 weeks
+- Custom (user can input value)
+
+-------------------------------------
+4. INVENTORY DETAILS (NEW COLUMN)
+-------------------------------------
+
+Add a column showing warehouse-level inventory.
+
+Display format example:
+
+- “Dallas WH: 10”
+- “Chicago WH: 5”
+- “Split fulfillment”
+
+Include at least one example of:
+- multiple warehouses fulfilling one order
+
+-------------------------------------
+5. SUPERSEDED PART HANDLING
+-------------------------------------
+
+If a superseded part is used:
+
+- show note inside Inventory Details:
+  “Superseded from Part XXXX”
+
+Keep this subtle but visible.
+
+-------------------------------------
+6. PACK QUANTITY COLUMN
+-------------------------------------
+
+Replace “OH” with:
+
+“Pack Quantity”
+
+Options per row:
+- 1
+- 5
+- 10
+
+-------------------------------------
+7. INVENTORY STATUS (SIMPLIFIED)
+-------------------------------------
+
+Add a column:
+
+“Inventory Status”
+
+Only allow these values:
+
+- Completely Available
+- Partially Available
+- Not Available / Need to check GOMS
+
+-------------------------------------
+8. KEEP TABLE CLEAN
+-------------------------------------
+
+- Avoid adding extra columns
+- Keep spacing readable
+- Do not introduce new complexity outside these fields
+
+-------------------------------------
+UX PRINCIPLES
+-------------------------------------
+
+- Focus on clarity and speed
+- Show only information needed for decision-making
+- Avoid overwhelming the user
+- Make the table feel like a real operational tool
+
+-------------------------------------
+FINAL RESULT
+-------------------------------------
+
+The table should feel like:
+
+“A real Daily Bids validation grid for matching, pricing, and inventory decisions”
+
+NOT:
+
+“A generic data table”
