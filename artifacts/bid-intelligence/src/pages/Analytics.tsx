@@ -10,11 +10,13 @@ import { cn } from "@/lib/utils";
 
 type PeriodKey = "7d" | "30d" | "90d" | "365d";
 
-const PERIODS: { key: PeriodKey; label: string; days: number; buckets: number; bucketLabel: string }[] = [
-  { key: "7d", label: "1 Week", days: 7, buckets: 7, bucketLabel: "day" },
-  { key: "30d", label: "1 Month", days: 30, buckets: 10, bucketLabel: "3-day" },
-  { key: "90d", label: "90 Days", days: 90, buckets: 12, bucketLabel: "week" },
-  { key: "365d", label: "365 Days", days: 365, buckets: 12, bucketLabel: "month" },
+const BIDS_PER_YEAR = 2500;
+
+const PERIODS: { key: PeriodKey; label: string; days: number; buckets: number; bucketLabel: string; totalBids: number }[] = [
+  { key: "7d", label: "1 Week", days: 7, buckets: 7, bucketLabel: "day", totalBids: Math.round((BIDS_PER_YEAR * 7) / 365) },
+  { key: "30d", label: "1 Month", days: 30, buckets: 10, bucketLabel: "3-day", totalBids: Math.round((BIDS_PER_YEAR * 30) / 365) },
+  { key: "90d", label: "90 Days", days: 90, buckets: 12, bucketLabel: "week", totalBids: Math.round((BIDS_PER_YEAR * 90) / 365) },
+  { key: "365d", label: "365 Days", days: 365, buckets: 12, bucketLabel: "month", totalBids: BIDS_PER_YEAR },
 ];
 
 const PARTS = [
@@ -87,53 +89,62 @@ function bucketLabels(p: (typeof PERIODS)[number]): string[] {
   return months;
 }
 
-function scaleForPeriod(p: PeriodKey): number {
-  // bigger window = bigger totals
-  return p === "7d" ? 1 : p === "30d" ? 4 : p === "90d" ? 11 : 42;
+/* Distribute a target total across N items using a deterministic weighted RNG */
+function distribute(total: number, keys: string[], period: PeriodKey, seedSalt: string): number[] {
+  const weights = keys.map((k) => {
+    const rng = mulberry32(hashString(k + period + seedSalt));
+    return 0.5 + rng(); // 0.5–1.5 weight
+  });
+  const wsum = weights.reduce((a, b) => a + b, 0);
+  const raw = weights.map((w) => (w / wsum) * total);
+  const rounded = raw.map((r) => Math.round(r));
+  // Adjust to hit total exactly
+  let diff = total - rounded.reduce((a, b) => a + b, 0);
+  let i = 0;
+  while (diff !== 0) {
+    rounded[i % rounded.length] += diff > 0 ? 1 : -1;
+    diff += diff > 0 ? -1 : 1;
+    i++;
+  }
+  return rounded;
 }
 
-/* ---------- Aggregations (deterministic per period) ---------- */
+/* ---------- Aggregations (deterministic per period, anchored at 2,500 bids/year) ---------- */
+
+function getCustomerVolume(period: PeriodKey) {
+  const meta = PERIODS.find((p) => p.key === period)!;
+  const bidsArr = distribute(meta.totalBids, CUSTOMERS, period, "cust");
+  return CUSTOMERS.map((c, i) => ({ customer: c, bids: bidsArr[i] }))
+    .sort((a, b) => b.bids - a.bids)
+    .slice(0, 8);
+}
 
 function getPartsSold(period: PeriodKey) {
-  const scale = scaleForPeriod(period);
-  return PARTS.map((p) => {
-    const rng = mulberry32(hashString(p.id + period));
-    const base = 40 + Math.floor(rng() * 80); // 40–120
-    return {
-      part: p.id,
-      label: `${p.id} · ${p.name}`,
-      units: Math.round(base * scale),
-    };
-  }).sort((a, b) => b.units - a.units);
+  const meta = PERIODS.find((p) => p.key === period)!;
+  // ~10 line items per bid on average
+  const totalUnits = meta.totalBids * 10;
+  const unitsArr = distribute(totalUnits, PARTS.map((p) => p.id), period, "part");
+  return PARTS.map((p, i) => ({
+    part: p.id,
+    label: `${p.id} · ${p.name}`,
+    units: unitsArr[i],
+  })).sort((a, b) => b.units - a.units);
 }
 
 function getCustomerTiers(period: PeriodKey) {
-  const scale = scaleForPeriod(period);
+  const meta = PERIODS.find((p) => p.key === period)!;
+  // Revenue scales with bid volume: ~$3.5K per bid in display units (thousands)
+  const totalRevenueK = meta.totalBids * 3.5;
   const weights = [0.42, 0.31, 0.18, 0.09]; // Platinum dominates
-  const total = 240 * scale;
   return TIERS.map((t, i) => {
     const rng = mulberry32(hashString(t.name + period));
-    const jitter = 0.9 + rng() * 0.2;
+    const jitter = 0.92 + rng() * 0.16;
     return {
       name: t.name,
       color: t.color,
-      revenue: Math.round(total * weights[i] * jitter),
+      revenue: Math.round(totalRevenueK * weights[i] * jitter),
     };
   });
-}
-
-function getCustomerVolume(period: PeriodKey) {
-  const scale = scaleForPeriod(period);
-  return CUSTOMERS.map((c) => {
-    const rng = mulberry32(hashString(c + period));
-    const base = 8 + Math.floor(rng() * 22); // 8–30 bids
-    return {
-      customer: c,
-      bids: Math.round(base * (scale * 0.6 + 0.4)),
-    };
-  })
-    .sort((a, b) => b.bids - a.bids)
-    .slice(0, 8);
 }
 
 function getPartTrends(period: PeriodKey) {
@@ -204,16 +215,16 @@ export default function Analytics() {
   const totals = useMemo(() => {
     const units = partsSold.reduce((s, p) => s + p.units, 0);
     const revenue = tiers.reduce((s, t) => s + t.revenue, 0) * 1000;
-    const bids = customerVolume.reduce((s, c) => s + c.bids, 0);
+    const bids = periodMeta.totalBids;
     return { units, revenue, bids };
-  }, [partsSold, tiers, customerVolume]);
+  }, [partsSold, tiers, periodMeta]);
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Analytics</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Daily Bids Analytics</h1>
           <p className="text-muted-foreground mt-1">
             Historical KPIs for the Daily Bids team — parts performance, customer mix, and demand trends.
           </p>
@@ -264,7 +275,7 @@ export default function Analytics() {
               Bids submitted · {periodMeta.label}
             </div>
             <div className="text-2xl font-bold tabular-nums mt-1">{totals.bids.toLocaleString()}</div>
-            <div className="text-xs text-muted-foreground mt-0.5">Top {customerVolume.length} customers</div>
+            <div className="text-xs text-muted-foreground mt-0.5">All customers combined</div>
           </CardContent>
         </Card>
       </div>
