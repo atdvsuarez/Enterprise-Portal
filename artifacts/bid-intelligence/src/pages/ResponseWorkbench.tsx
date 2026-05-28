@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Sparkles, Mail, ArrowLeft, CheckCircle2, Send, Paperclip, FileSpreadsheet } from "lucide-react";
+import { Sparkles, Mail, ArrowLeft, CheckCircle2, Send, Paperclip, FileSpreadsheet, Inbox, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 function StatusChip({ children }: { children: React.ReactNode }) {
@@ -94,8 +94,42 @@ Cummins Aftermarket`,
   const [body, setBody] = useState(defaultBody);
   const [emailOpen, setEmailOpen] = useState(false);
 
-  const to = `procurement@${bid.customer.toLowerCase().replace(/[^a-z0-9]/g, "")}.gov`;
+  const customerDomain = `${bid.customer.toLowerCase().replace(/[^a-z0-9]/g, "")}.gov`;
+  const to = `procurement@${customerDomain}`;
   const subject = `Response to ${bid.rfqId} — ${bid.title}`;
+
+  const buyerName = "Janet Whitman";
+  const buyerEmail = `procurement@${customerDomain}`;
+  const originalSubject = `RFQ ${bid.rfqId} — ${bid.title}`;
+  const originalDate = new Date(bid.createdDate).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const originalBody = `Hello Cummins Aftermarket Team,
+
+Please find attached our request for quote (RFQ ${bid.rfqId}) covering ${items.length} line items for ${bid.title}. ${bid.customer} is seeking pricing, availability, and lead times for the parts listed in the attached schedule.
+
+Key requirements:
+• Quotes are due no later than ${new Date(bid.closeDate).toLocaleDateString()}.
+• Pricing should be firm for 30 days from submission.
+• Delivery to our central depot, FOB destination.
+• Please reference RFQ ${bid.rfqId} on all correspondence and pricing sheets.
+
+Let me know if you have any questions or need clarification on any line item.
+
+Best regards,
+${buyerName}
+Procurement Specialist
+${bid.customer}
+${buyerEmail}`;
+
+  const sendInOutlook = () => {
+    const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailto;
+    toast.success("Draft opened in Outlook", {
+      description: `Attach ${attachmentName} before sending.`,
+    });
+  };
 
   return (
     <div className="flex flex-col min-h-[calc(100vh-64px)]">
@@ -131,14 +165,19 @@ Cummins Aftermarket`,
         <div className="lg:col-span-7 space-y-4">
           <Card className="shadow-sm">
             <CardHeader className="pb-3 border-b">
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
                   AI Drafted Response
                 </CardTitle>
-                <Button size="sm" className="gap-1.5" onClick={() => setEmailOpen(true)}>
-                  <Mail className="h-4 w-4" /> View Email
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setEmailOpen(true)}>
+                    <Inbox className="h-4 w-4" /> View Email
+                  </Button>
+                  <Button size="sm" className="gap-1.5" onClick={sendInOutlook}>
+                    <ExternalLink className="h-4 w-4" /> Send in Outlook
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -206,27 +245,47 @@ Cummins Aftermarket`,
         </div>
       </div>
 
-      {/* View Email Dialog */}
+      {/* Original Customer Email Dialog */}
       <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Mail className="h-4 w-4" /> Email Preview
+              <Inbox className="h-4 w-4" /> Original Customer Email
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <div className="border rounded-md bg-muted/20 px-4 py-3 text-sm space-y-1">
-              <div className="flex gap-3"><span className="text-muted-foreground w-16">To</span><span className="font-medium">{to}</span></div>
-              <div className="flex gap-3"><span className="text-muted-foreground w-16">Subject</span><span className="font-medium">{subject}</span></div>
+              <div className="flex gap-3">
+                <span className="text-muted-foreground w-16 shrink-0">From</span>
+                <span className="font-medium truncate">{buyerName} &lt;{buyerEmail}&gt;</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="text-muted-foreground w-16 shrink-0">To</span>
+                <span className="font-medium truncate">bids@cummins.com</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="text-muted-foreground w-16 shrink-0">Date</span>
+                <span className="font-medium">{originalDate}</span>
+              </div>
+              <div className="flex gap-3">
+                <span className="text-muted-foreground w-16 shrink-0">Subject</span>
+                <span className="font-medium truncate">{originalSubject}</span>
+              </div>
             </div>
             <div className="border rounded-md bg-background p-4 max-h-[360px] overflow-auto">
-              <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">{body}</pre>
+              <pre className="whitespace-pre-wrap text-sm font-sans leading-relaxed">{originalBody}</pre>
             </div>
             <div>
               <div className="flex items-center gap-2 mb-2 text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
-                <Paperclip className="h-3 w-3" /> Attachment
+                <Paperclip className="h-3 w-3" /> Attachment from Customer
               </div>
-              <AttachmentChip onDownload={downloadCsv} />
+              <div className="inline-flex items-center gap-2 rounded-md border bg-card px-3 py-2">
+                <FileSpreadsheet className="h-5 w-5 text-[#1f7a4a]" />
+                <span className="flex flex-col">
+                  <span className="text-xs font-medium">{bid.rfqId}-RFQ.xlsx</span>
+                  <span className="text-[10px] text-muted-foreground">Excel · {items.length} line items requested</span>
+                </span>
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -235,10 +294,10 @@ Cummins Aftermarket`,
               className="gap-1.5"
               onClick={() => {
                 setEmailOpen(false);
-                toast.success("Email sent", { description: `Response for ${bid.rfqId} delivered to ${bid.customer}.` });
+                sendInOutlook();
               }}
             >
-              <Send className="h-4 w-4" /> Send Email
+              <ExternalLink className="h-4 w-4" /> Reply in Outlook
             </Button>
           </DialogFooter>
         </DialogContent>
