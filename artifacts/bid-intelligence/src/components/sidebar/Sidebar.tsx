@@ -1,6 +1,6 @@
 import { useRole } from "@/lib/role";
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Inbox, Activity, CheckSquare, Wrench, BookOpen, Send, BarChart2, Settings, Globe, Sparkles } from "lucide-react";
+import { LayoutDashboard, Inbox, Activity, CheckSquare, Wrench, BookOpen, Send, BarChart2, Settings, Globe, Sparkles, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function Sidebar() {
@@ -8,18 +8,12 @@ export function Sidebar() {
   const [location] = useLocation();
 
   const getLinks = () => {
-    const common = [
-      { href: "/", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/monitor", label: "Bid Monitor", icon: Activity },
-      { href: "/evaluation", label: "Bid Evaluation", icon: CheckSquare },
-      { href: "/knowledge", label: "Knowledge Base", icon: BookOpen },
-      { href: "/analytics", label: "Analytics", icon: BarChart2 },
-      { href: "/settings", label: "Settings", icon: Settings },
-    ];
+    const home = { href: "/", label: "Home", icon: Home };
 
     if (role === "daily") {
       return [
-        { href: "/", label: "Dashboard", icon: LayoutDashboard },
+        home,
+        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/monitor", label: "Bid Monitor", icon: Activity },
         { href: "/workbench", label: "Response Workbench", icon: Wrench },
         { href: "/ai-workbench", label: "Insights Chat", icon: Sparkles },
@@ -28,7 +22,8 @@ export function Sidebar() {
 
     if (role === "admin") {
       return [
-        { href: "/", label: "Dashboard", icon: LayoutDashboard },
+        home,
+        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/intake", label: "Bid Intake", icon: Inbox },
         { href: "/monitor", label: "Bid Monitor", icon: Activity },
         { href: "/evaluation", label: "Bid Evaluation", icon: CheckSquare },
@@ -39,10 +34,11 @@ export function Sidebar() {
         { href: "/settings", label: "Settings", icon: Settings },
       ];
     }
-    
+
     if (role === "scout") {
       return [
-        { href: "/", label: "Dashboard", icon: LayoutDashboard },
+        home,
+        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/portals", label: "Portal Manager", icon: Globe },
         { href: "/monitor", label: "Bid Monitor", icon: Activity },
         { href: "/evaluation", label: "Bid Evaluation", icon: CheckSquare },
@@ -54,7 +50,8 @@ export function Sidebar() {
 
     if (role === "ae") {
       return [
-        { href: "/", label: "Dashboard", icon: LayoutDashboard },
+        home,
+        { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
         { href: "/approvals", label: "Bid Approval Queue", icon: CheckSquare },
         { href: "/executive-summary", label: "Executive Summary", icon: LayoutDashboard },
         { href: "/post-submission", label: "Post Submission", icon: Send },
@@ -63,7 +60,15 @@ export function Sidebar() {
       ];
     }
 
-    return common;
+    return [
+      home,
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/monitor", label: "Bid Monitor", icon: Activity },
+      { href: "/evaluation", label: "Bid Evaluation", icon: CheckSquare },
+      { href: "/knowledge", label: "Knowledge Base", icon: BookOpen },
+      { href: "/analytics", label: "Analytics", icon: BarChart2 },
+      { href: "/settings", label: "Settings", icon: Settings },
+    ];
   };
 
   const links = getLinks();

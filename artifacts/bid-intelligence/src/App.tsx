@@ -19,10 +19,11 @@ import PostSubmission from "@/pages/PostSubmission";
 import Analytics from "@/pages/Analytics";
 import Settings from "@/pages/Settings";
 import AIWorkbench from "@/pages/AIWorkbench";
+import Home from "@/pages/Home";
 
 const queryClient = new QueryClient();
 
-const DAILY_ALLOWED = new Set(["/", "/monitor", "/workbench", "/ai-workbench"]);
+const DAILY_ALLOWED = new Set(["/", "/dashboard", "/monitor", "/workbench", "/ai-workbench"]);
 
 function DailyGuard({ children, path }: { children: React.ReactNode; path: string }) {
   const { role } = useRole();
@@ -33,7 +34,8 @@ function DailyGuard({ children, path }: { children: React.ReactNode; path: strin
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={Home} />
+      <Route path="/dashboard" component={Dashboard} />
       <Route path="/intake">{() => <DailyGuard path="/intake"><BidIntake /></DailyGuard>}</Route>
       <Route path="/monitor" component={BidMonitor} />
       <Route path="/evaluation">{() => <DailyGuard path="/evaluation"><BidEvaluation /></DailyGuard>}</Route>
