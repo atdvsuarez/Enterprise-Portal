@@ -5,7 +5,7 @@ import {
   BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis,
   CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { TrendingUp, Users, Award, BarChart3 } from "lucide-react";
+import { TrendingUp, Users, Award, BarChart3, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type PeriodKey = "7d" | "30d" | "90d" | "365d";
@@ -41,6 +41,13 @@ const CUSTOMERS = [
   "OCTA",
   "SORTA",
   "TriMet",
+];
+
+const ITEM_TYPES = [
+  { code: "IND-Parts", label: "Industrial Parts", color: "#DA291C", weight: 0.38 },
+  { code: "DX-Parts", label: "Distribution Parts", color: "#2A2A2A", weight: 0.27 },
+  { code: "DRC-ENG", label: "ReCon Engines", color: "#1f7a4a", weight: 0.21 },
+  { code: "Others-Prod", label: "Other Products", color: "#8E9AAB", weight: 0.14 },
 ];
 
 const TIERS = [
@@ -147,6 +154,24 @@ function getCustomerTiers(period: PeriodKey) {
   });
 }
 
+function getItemTypeSales(period: PeriodKey) {
+  const meta = PERIODS.find((p) => p.key === period)!;
+  // Revenue in dollars (units of $K) split by item type, anchored to bid volume
+  const totalRevenueK = meta.totalBids * 3.5;
+  const totalUnits = meta.totalBids * 10;
+  return ITEM_TYPES.map((t) => {
+    const rng = mulberry32(hashString(t.code + period));
+    const jitter = 0.9 + rng() * 0.2;
+    return {
+      code: t.code,
+      label: t.label,
+      color: t.color,
+      revenue: Math.round(totalRevenueK * t.weight * jitter * 1000),
+      units: Math.round(totalUnits * t.weight * jitter),
+    };
+  }).sort((a, b) => b.revenue - a.revenue);
+}
+
 function getPartTrends(period: PeriodKey) {
   const p = PERIODS.find((x) => x.key === period)!;
   const labels = bucketLabels(p);
@@ -210,6 +235,7 @@ export default function Analytics() {
   const tiers = useMemo(() => getCustomerTiers(period), [period]);
   const customerVolume = useMemo(() => getCustomerVolume(period), [period]);
   const partTrends = useMemo(() => getPartTrends(period), [period]);
+  const itemTypeSales = useMemo(() => getItemTypeSales(period), [period]);
   const topPartIds = useMemo(() => partsSold.slice(0, 5).map((p) => p.part), [partsSold]);
 
   const totals = useMemo(() => {
@@ -396,6 +422,42 @@ export default function Analytics() {
             </LineChart>
           </ResponsiveContainer>
         </ChartCard>
+
+        {/* Sales by Item Type Code */}
+        <div className="lg:col-span-2">
+          <ChartCard
+            title="Sales by Item Type Code"
+            description={`Revenue by product family · ${periodMeta.label.toLowerCase()}`}
+            icon={Package}
+          >
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={itemTypeSales} margin={{ left: 8, right: 16, top: 12, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#eee" vertical={false} />
+                <XAxis
+                  dataKey="code"
+                  tick={{ fontSize: 12, fontWeight: 600 }}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 11 }}
+                  tickFormatter={(v: number) => formatCompactCurrency(v)}
+                />
+                <Tooltip
+                  formatter={(v: number, _n, item) => [
+                    `${formatCompactCurrency(v)} · ${(item.payload.units as number).toLocaleString()} units`,
+                    item.payload.label as string,
+                  ]}
+                  contentStyle={{ fontSize: 12, borderRadius: 6 }}
+                />
+                <Bar dataKey="revenue" radius={[6, 6, 0, 0]} maxBarSize={120}>
+                  {itemTypeSales.map((t) => (
+                    <Cell key={t.code} fill={t.color} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </ChartCard>
+        </div>
       </div>
     </div>
   );
